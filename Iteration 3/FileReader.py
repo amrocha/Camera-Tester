@@ -12,11 +12,11 @@ def parseCoreLog(fileName):
                 tracknum = core_msg.findtext('TrackNum')
                 time = core_msg.attrib.get('UTC')
                 for cart in core_msg:
-                        if cart.tag == 'Cart':
-                                cart_x = cart.attrib.get('X')
-                                cart_y = cart.attrib.get('Y')
+                        if cart.tag == 'WGS84':
+                                lat = cart.attrib.get('LAT')
+                                lon = cart.attrib.get('LONG')
                 if tracknum > 0:
-                        core_entries.append(Coordinate(time, tracknum, cart_x, cart_y))
+                        core_entries.append(Coordinate(time, tracknum, float(lon), float(lat)))
                         """ The prints and the incrementation of i exists solely to check what
                         is actually being recorded in the objects, and should be deleted in the final
                         version"""
