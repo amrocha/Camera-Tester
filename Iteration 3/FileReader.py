@@ -1,31 +1,29 @@
 import xml.etree.ElementTree as et
 from Coordinate import Coordinate
+from operator import itemgetter, attrgetter
 
 def parseCoreLog(fileName):
         
-        with open(fileName, 'rt') as file:
-                tree = et.parse(file)
+	with open(fileName, 'rt') as file:
+		tree = et.parse(file)
 
-        core_entries = []
-        i = 0
-        for core_msg in tree.iterfind('CORE_MSG'):
-                tracknum = core_msg.findtext('TrackNum')
-                time = core_msg.attrib.get('UTC')
-                for cart in core_msg:
-                        if cart.tag == 'WGS84':
-                                lat = cart.attrib.get('LAT')
-                                lon = cart.attrib.get('LONG')
-                if tracknum > 0:
-                        core_entries.append(Coordinate(time, tracknum, float(lon), float(lat)))
-                        """ The prints and the incrementation of i exists solely to check what
-                        is actually being recorded in the objects, and should be deleted in the final
-                        version"""
-                        #print core_entries[i].time
-                        #print core_entries[i].tn
-                        #print core_entries[i].longitude
-                        #print core_entries[i].latitude
-                        i += 1
-        return core_entries
+	core_entries = []
+
+	for core_msg in tree.iterfind('CORE_MSG'):
+		tracknum = core_msg.findtext('TrackNum')
+		time = core_msg.attrib.get('UTC')
+		for cart in core_msg:
+			if cart.tag == 'WGS84':
+				lat = cart.attrib.get('LAT')
+				lon = cart.attrib.get('LONG')
+				if tracknum > 0:
+					core_entries.append(Coordinate(time, tracknum, float(lon), float(lat)))
+	asterisk_entries = []
+	asterisk_entries = sorted(core_entries, key=attrgetter('tn', 'time'))
+	#for entry in asterisk_entries:
+	#	print entry.tn
+	#	print entry.time
+	return asterisk_entries
         
 def parseGpsLog(fileName):
         f = open('gps.log', 'r')
