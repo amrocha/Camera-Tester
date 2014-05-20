@@ -123,25 +123,18 @@ class Scenario:
             kml += ','
             kml += repr (self.core_entries[i].latitude)
             kml += ',0\n'
+            i += 1
             #If the track number changes, stop the loop, and create a new line
-            if(i + 1 < len(self.core_entries)):
-                if (self.core_entries[i].tn != self.core_entries[i+1].tn):
-                    i += 1
-                while (self.core_entries[i].tn == self.core_entries[i+1].tn):
+            if(i < len(self.core_entries)):
+                while (self.core_entries[i-1].tn == self.core_entries[i].tn):
                     print i
                     kml += repr(self.core_entries[i].longitude)
                     kml += ','
                     kml += repr(self.core_entries[i].latitude)
                     kml += ',0\n'
                     i += 1
-                    if(i + 1 >= len(self.core_entries)):
+                    if(i >= len(self.core_entries)):
                         break;
-            elif(i < len(self.core_entries)):
-                kml += repr(self.core_entries[i].longitude)
-                kml += ','
-                kml += repr(self.core_entries[i].latitude)
-                kml += ',0\n'
-                i += 1
             kml +=                  '</coordinates>'
             kml +=              '</LineString>'
             kml +=          '</Placemark>'
