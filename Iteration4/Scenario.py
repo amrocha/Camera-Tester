@@ -1,10 +1,10 @@
 import FileReader
 from Coordinate import Coordinate
 import subprocess, math
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import fmin_cobyla
-from decimal import *
+#import numpy as np
+#import matplotlib.pyplot as plt
+#from scipy.optimize import fmin_cobyla
+#from decimal import *
 
 class Scenario:
     """
@@ -62,7 +62,54 @@ class Scenario:
     The Core log contains timestamps generated during the run of camsim
     """
     def calculateTimeOffset(self):
-        return 33;
+        return 33
+
+	"""
+	coreLogPath is the list of Coordinates from the path that has been matched with the GPS file
+	pathDistances is the list of calculated distances between each point in coreLogPath and the GPS path. The coordinate coreLogPath[i] has a distance of pathDistances[i].
+	
+	for now I've assumed that a tracknum of -1 is used in coreLogPath at any point in time when nothing was detected
+	this may need to be changed depending on how the path comparison is implemented
+	"""
+    def calculateMetrics(self, coreLogPath, pathDistances):
+        #for calculating the detection percent
+        numDetected = float(len(coreLogPath))
+        
+        #for calculating id changes
+        previousID = -1
+        numIDChanges = -1
+        
+        #for calculating the positional accuracy metrics
+        totalDist = 0
+        minDist = 99999
+        maxDist = -1
+        numAboveRadius = 0
+        
+        for i in range(0, len(coreLogPath)):
+            if coreLogPath[i].tn < 0:
+                numDetected -= 1
+            else:
+                if coreLogPath[i].tn != previousID:
+                    previousID = coreLogPath[i].tn
+                    numIDChanges += 1
+                totalDist += pathDistances[i]
+                if pathDistances[i] < minDist:
+                    minDist = pathDistances[i]
+                if pathDistances[i] > maxDist:
+                    maxDist = pathDistances[i]
+                if pathDistances[i] > self.maxRadius:
+                    numAboveRadius += 1
+        
+        self.detectionPercent = numDetected / len(coreLogPath) * 100
+        self.idChanges = numIDChanges
+        self.minPositonalAccuracy = minDist
+        self.maxPositionalAccuracy = maxDist
+        if numDetected > 0:
+            self.averagePositionalAccuracy = totalDist / numDetected
+            self.percentWithinMaxRadius = (numDetected - numAboveRadius) / numDetected * 100
+        else:
+            self.averagePositionalAccuracy = -1
+            self.percentWithinMaxRadius = -1
 
     #this will compare the files and output the result
     def comparePath(self):
