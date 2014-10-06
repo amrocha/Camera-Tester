@@ -1,6 +1,7 @@
 import FileReader
 from Coordinate import Coordinate
 import subprocess, math
+import time
 #import numpy as np
 #import matplotlib.pyplot as plt
 #from scipy.optimize import fmin_cobyla
@@ -17,11 +18,12 @@ class Scenario:
     timeOffset: the timestamp difference used to compare points in time between the two log files
     maxRadius: the maximum distance a point from the core log can be from a corresponding gps log point for it to be considered accurate
     """
-    def __init__ (self, scenarioID, maxRadius, gpsLog, coreLog=None):
+    def __init__ (self, scenarioID, maxRadius, gpsLog, coreLog=None, timeOffset=None):
         self.scenarioID = scenarioID
+        self.date = time.strftime("%Y/%m/%d %H:%M:%S")
         self.coreLog = coreLog
         self.gpsLog = gpsLog
-        self.timeOffset = None
+        self.timeOffset = timeOffset
         self.maxRadius = maxRadius
 
     def run(self):
@@ -31,6 +33,8 @@ class Scenario:
         self.gps_entries = FileReader.parseGpsLog(self.gpsLog)
         self.timeOffset = self.calculateTimeOffset()
         distances = self.comparePath()
+        self.calculateMetrics(self.core_entries, distances)
+        self.createDataSheet()
         print "Minimum Distance"
         print min(distances)
         print "Maximum Distance"
@@ -183,7 +187,53 @@ class Scenario:
 
         else:
             return None
-
+    """
+	To be called after the metrics have been calculated to output a
+	.txt file containing all the results
+	"""
+    def createDataSheet(self):
+		f = open('results.txt', 'w')
+		
+		txt = 'Scenario ID: '
+		txt += repr(self.scenarioID)
+		txt += '\n'
+		txt += 'Date: '  
+		txt += self.date
+		txt += '\n'
+		txt += 'Video files used: '
+		#txt += repr(self.videoFileList) [#test.avi, test2.avi, etc.]
+		txt += '\n'
+		txt += 'GPS log files used: '
+		txt += repr(self.gpsLog)
+		txt += '\n'
+		txt += 'Asterisk file used: '
+		txt += repr(self.coreLog)
+		txt += '\n'
+		txt += 'Time offset: '
+		txt += repr(self.timeOffset)
+		txt += '\n'
+		txt += 'Maximum radius of detection: '
+		txt += repr(self.maxRadius)
+		txt += '\n\n'
+		txt += 'Overall detection percentage: '
+		txt += repr(self.detectionPercent)
+		txt += '\n'
+		txt += 'Overall accuracy (min, max, avg): '
+		txt += repr(self.minPositonalAccuracy)
+		txt += ' '
+		txt += repr(self.maxPositionalAccuracy)
+		txt += ' '
+		txt += repr(self.averagePositionalAccuracy)
+		txt += '\n'
+		txt += 'Overall ID change rate: '
+		txt += repr(self.idChanges)
+		txt += '\n'
+		txt += 'Overall percentage of points within maximum radius: '
+		txt += repr(self.percentWithinMaxRadius)
+		txt += '\n'
+		
+		f.write(txt)
+		f.close
 
     def export(self):
         f = open('path.kml', 'w')
