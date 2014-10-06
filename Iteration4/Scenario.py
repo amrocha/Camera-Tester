@@ -18,13 +18,14 @@ class Scenario:
     timeOffset: the timestamp difference used to compare points in time between the two log files
     maxRadius: the maximum distance a point from the core log can be from a corresponding gps log point for it to be considered accurate
     """
-    def __init__ (self, scenarioID, maxRadius, gpsLog, coreLog=None, timeOffset=None):
-        self.scenarioID = scenarioID
-        self.date = time.strftime("%Y/%m/%d %H:%M:%S")
-        self.coreLog = coreLog
-        self.gpsLog = gpsLog
-        self.timeOffset = timeOffset
-        self.maxRadius = maxRadius
+    def __init__ (self, scenarioID, maxRadius, txtDir, gpsLog, coreLog=None, timeOffset=None):
+		self.scenarioID = scenarioID
+		self.date = time.strftime("%Y-%m-%d_%H-%M-%S")
+		self.txtDir = txtDir
+		self.coreLog = coreLog
+		self.gpsLog = gpsLog
+		self.timeOffset = timeOffset
+		self.maxRadius = maxRadius
 
     def run(self):
         if self.coreLog == None:
@@ -192,7 +193,9 @@ class Scenario:
 	.txt file containing all the results
 	"""
     def createDataSheet(self):
-		f = open('results.txt', 'w')
+		filename = self.txtDir + '/result_' + self.date + '.txt' #Sets up path and name for creation of .txt file
+		
+		f = open(filename, 'w')
 		
 		txt = 'Scenario ID: '
 		txt += repr(self.scenarioID)
@@ -233,7 +236,7 @@ class Scenario:
 		txt += '\n'
 		
 		f.write(txt)
-		f.close
+		f.close()
 
     def export(self):
         f = open('path.kml', 'w')
