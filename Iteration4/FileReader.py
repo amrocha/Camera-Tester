@@ -20,9 +20,6 @@ def parseCoreLog(fileName):
 					core_entries.append(Coordinate(time, tracknum, float(lon), float(lat)))
 	asterisk_entries = []
 	asterisk_entries = sorted(core_entries, key=attrgetter('tn', 'time'))
-	#for entry in asterisk_entries:
-	#	print entry.tn
-	#	print entry.time
 	return asterisk_entries
 
 def parseGpsLog(fileName):

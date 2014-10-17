@@ -2,6 +2,7 @@ import FileReader
 from Coordinate import Coordinate
 import subprocess, math
 import time
+from datetime import datetime
 #import numpy as np
 #import matplotlib.pyplot as plt
 #from scipy.optimize import fmin_cobyla
@@ -20,7 +21,7 @@ class Scenario:
     """
     def __init__ (self, scenarioID, maxRadius, txtDir, gpsLog, coreLog=None, timeOffset=None):
 		self.scenarioID = scenarioID
-		self.date = time.strftime("%Y-%m-%d_%H-%M-%S")
+		self.date = datetime.utcnow()
 		self.txtDir = txtDir
 		self.coreLog = coreLog
 		self.gpsLog = gpsLog
@@ -36,6 +37,7 @@ class Scenario:
         distances = self.comparePath()
         self.calculateMetrics(self.core_entries, distances)
         self.createDataSheet()
+        self.export()
         print "Minimum Distance"
         print min(distances)
         print "Maximum Distance"
@@ -193,7 +195,8 @@ class Scenario:
 	.txt file containing all the results
 	"""
     def createDataSheet(self):
-		filename = self.txtDir + '/result_' + self.date + '.txt' #Sets up path and name for creation of .txt file
+		filename = self.txtDir + '/result_' + repr(self.date.year) + '-' + repr(self.date.month) + '-' + repr(self.date.day) + '_' + repr(self.date.hour) + '-' + repr(self.date.minute) + '-' + repr(self.date.second) + '.txt' 
+		#Sets up path and name for creation of .txt file
 		
 		f = open(filename, 'w')
 		
@@ -201,7 +204,10 @@ class Scenario:
 		txt += repr(self.scenarioID)
 		txt += '\n'
 		txt += 'Date: '  
-		txt += self.date
+		txt += str(self.date)
+		txt += '\n'
+		txt += 'Time taken: '
+		txt += str(datetime.utcnow() - self.date)
 		txt += '\n'
 		txt += 'Video files used: '
 		#txt += repr(self.videoFileList) [#test.avi, test2.avi, etc.]
@@ -217,7 +223,7 @@ class Scenario:
 		txt += '\n'
 		txt += 'Maximum radius of detection: '
 		txt += repr(self.maxRadius)
-		txt += '\n\n'
+		txt += ' meters\n\n'
 		txt += 'Overall detection percentage: '
 		txt += repr(self.detectionPercent)
 		txt += '\n'
