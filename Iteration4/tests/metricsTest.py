@@ -39,3 +39,4 @@ print 'Min distance', scenario.minPositonalAccuracy                             
 print 'Max distance', scenario.maxPositionalAccuracy                                        #expected: 7.5
 print 'Average postional Accuracy', scenario.averagePositionalAccuracy                      #expected: 5.35
 print 'Percent within ', scenario.maxRadius, 'm: ', scenario.percentWithinMaxRadius, '%'    #expected 33.33%
+scenario.createDataSheet()
