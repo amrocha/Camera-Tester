@@ -20,3 +20,4 @@ print 'Please enter directory to save .txt'
 txtDir = askdirectory()
 s = Scenario(1, 8, txtDir, gps, core)
 s.run()
+#s.export()
