@@ -1,5 +1,6 @@
 import FileReader
 from Coordinate import Coordinate
+from MetricsResult import MetricsResult
 import subprocess, math
 import time
 from datetime import datetime
@@ -20,13 +21,13 @@ class Scenario:
     maxRadius: the maximum distance a point from the core log can be from a corresponding gps log point for it to be considered accurate
     """
     def __init__ (self, scenarioID, maxRadius, txtDir, gpsLog, coreLog=None, timeOffset=None):
-		self.scenarioID = scenarioID
-		self.date = datetime.utcnow()
-		self.txtDir = txtDir
-		self.coreLog = coreLog
-		self.gpsLog = gpsLog
-		self.timeOffset = timeOffset
-		self.maxRadius = maxRadius
+        self.scenarioID = scenarioID
+        self.date = datetime.utcnow()
+        self.txtDir = txtDir
+        self.coreLog = coreLog
+        self.gpsLog = gpsLog
+        self.timeOffset = timeOffset
+        self.maxRadius = maxRadius
 
     def run(self):
         if self.coreLog == None:
@@ -71,52 +72,117 @@ class Scenario:
     def calculateTimeOffset(self):
         return 33
 
-	"""
-	coreLogPath is the list of Coordinates from the path that has been matched with the GPS file
-	pathDistances is the list of calculated distances between each point in coreLogPath and the GPS path. The coordinate coreLogPath[i] has a distance of pathDistances[i].
-	
-	for now I've assumed that a tracknum of -1 is used in coreLogPath at any point in time when nothing was detected
-	this may need to be changed depending on how the path comparison is implemented
-	"""
+    """
+    coreLogPath is the list of Coordinates from the path that has been matched with the GPS file
+    pathDistances is the list of calculated distances between each point in coreLogPath and the GPS path. The coordinate coreLogPath[i] has a distance of pathDistances[i].
+    
+    for now I've assumed that a tracknum of -1 is used in coreLogPath at any point in time when nothing was detected
+    this may need to be changed depending on how the path comparison is implemented
+    """
     def calculateMetrics(self, coreLogPath, pathDistances):
+        #all counters with an array of length two have the twenty minute segment counter at index 0 and the total counter at index 1
+        #index 0 resets every twenty minutes of footage
+        
         #for calculating the detection percent
-        numDetected = float(len(coreLogPath))
+        numUndetected = [0,0]
         
         #for calculating id changes
-        previousID = -1
-        numIDChanges = -1
+        previousID = [-1,-1]
+        numIDChanges = [-1,-1]
         
         #for calculating the positional accuracy metrics
-        totalDist = 0
-        minDist = 99999
-        maxDist = -1
-        numAboveRadius = 0
+        totalDist = [0,0]
+        minDist = [99999, 99999]
+        maxDist = [-1,-1]
+        numAboveRadius = [0,0]
+
+        #used for 20 minute time segments
+        timeSegmentStart = coreLogPath[0].time[:4] + '00.000'
+        timeSegmentStartIndex = 0
+        self.twentyMinuteResults = []
         
         for i in range(0, len(coreLogPath)):
+            # if 20 minutes have passed, create the results. Then start the next twenty minute segment
+            if (int(coreLogPath[i].time[2:4]) - int(timeSegmentStart[2:4]))%60 >= 20:
+                self.twentyMinuteResults.append(MetricsResult(i - timeSegmentStartIndex, timeSegmentStart, self.addTimeStamps(timeSegmentStart, '001959.999'),
+                                                         numUndetected[0], numIDChanges[0], minDist[0], maxDist[0], totalDist[0], numAboveRadius[0]))
+                timeSegmentStartIndex = i
+                timeSegmentStart = self.addTimeStamps(timeSegmentStart, '002000.00')
+                
+                #reset all twenty minute segment counters
+                numUndetected[0] = 0
+                previousID[0] = -1
+                numIDChanges[0] = -1
+                totalDist[0] = 0
+                minDist[0] = 99999
+                maxDist[0] = -1
+                numAboveRadius[0] = 0
+            
             if coreLogPath[i].tn < 0:
-                numDetected -= 1
+                numUndetected[0] += 1
+                numUndetected[1] += 1
             else:
-                if coreLogPath[i].tn != previousID:
-                    previousID = coreLogPath[i].tn
-                    numIDChanges += 1
-                totalDist += pathDistances[i]
-                if pathDistances[i] < minDist:
-                    minDist = pathDistances[i]
-                if pathDistances[i] > maxDist:
-                    maxDist = pathDistances[i]
+                if coreLogPath[i].tn != previousID[0]:
+                    previousID[0] = coreLogPath[i].tn
+                    numIDChanges[0] += 1
+                if coreLogPath[i].tn != previousID[1]:
+                    previousID[1] = coreLogPath[i].tn
+                    numIDChanges[1] += 1
+                totalDist[0] += pathDistances[i]
+                totalDist[1] += pathDistances[i]
+                if pathDistances[i] < minDist[0]:
+                    minDist[0] = pathDistances[i]
+                if pathDistances[i] < minDist[1]:
+                    minDist[1] = pathDistances[i]
+                if pathDistances[i] > maxDist[0]:
+                    maxDist[0] = pathDistances[i]
+                if pathDistances[i] > maxDist[1]:
+                    maxDist[1] = pathDistances[i]
                 if pathDistances[i] > self.maxRadius:
-                    numAboveRadius += 1
+                    numAboveRadius[0] += 1
+                    numAboveRadius[1] += 1
+
+        #add last segment
+        self.twentyMinuteResults.append(MetricsResult(len(coreLogPath) - timeSegmentStartIndex, timeSegmentStart, coreLogPath[len(coreLogPath) - 1].time,
+                                                 numUndetected[0], numIDChanges[0], minDist[0], maxDist[0], totalDist[0], numAboveRadius[0]))
         
-        self.detectionPercent = numDetected / len(coreLogPath) * 100
-        self.idChanges = numIDChanges
-        self.minPositonalAccuracy = minDist
-        self.maxPositionalAccuracy = maxDist
-        if numDetected > 0:
-            self.averagePositionalAccuracy = totalDist / numDetected
-            self.percentWithinMaxRadius = (numDetected - numAboveRadius) / numDetected * 100
+        #create the total result
+        self.totalResult = MetricsResult(len(coreLogPath), coreLogPath[0].time[:4] + '00.000', coreLogPath[len(coreLogPath) - 1].time,
+                                         numUndetected[1], numIDChanges[1], minDist[1], maxDist[1], totalDist[1], numAboveRadius[1])
+        
+    #adds two timestamps of the format 'HHMMSS.mmm' 
+    def addTimeStamps(self, time1, time2):
+        second = float(time1[4:]) + float(time2[4:])
+        minute = int(time1[2:4]) + int(time2[2:4])
+        hour = int(time1[:2]) + int(time2[:2])
+        if second >= 60:
+            second %= 60
+            minute += 1
+        if minute >= 60:
+            minute %= 60
+            hour += 1
+        hour %= 24
+
+        if second < 10:
+            second = '0' + str(second)
         else:
-            self.averagePositionalAccuracy = -1
-            self.percentWithinMaxRadius = -1
+            second = str(second)
+        if len(second) == 2:
+            second += '.000'
+        elif len(second) == 4:
+            second += '00'
+        elif len(second) == 5:
+            second += '0'
+        
+        minute = str(minute)
+        if len(minute) == 1:
+            minute = '0' + minute
+
+        hour = str(hour)
+        if len(hour) == 1:
+            hour = '0' + hour
+        
+        return hour + minute + second
 
     #this will compare the files and output the result
     def comparePath(self):
@@ -191,58 +257,45 @@ class Scenario:
         else:
             return None
     """
-	To be called after the metrics have been calculated to output a
-	.txt file containing all the results
-	"""
+    To be called after the metrics have been calculated to output a
+    .txt file containing all the results
+    """
     def createDataSheet(self):
-		filename = self.txtDir + '/result_' + repr(self.date.year) + '-' + repr(self.date.month) + '-' + repr(self.date.day) + '_' + repr(self.date.hour) + '-' + repr(self.date.minute) + '-' + repr(self.date.second) + '.txt' 
-		#Sets up path and name for creation of .txt file
-		
-		f = open(filename, 'w')
-		
-		txt = 'Scenario ID: '
-		txt += repr(self.scenarioID)
-		txt += '\n'
-		txt += 'Date: '  
-		txt += str(self.date)
-		txt += '\n'
-		txt += 'Time taken: '
-		txt += str(datetime.utcnow() - self.date)
-		txt += '\n'
-		txt += 'Video files used: '
-		#txt += repr(self.videoFileList) [#test.avi, test2.avi, etc.]
-		txt += '\n'
-		txt += 'GPS log files used: '
-		txt += repr(self.gpsLog)
-		txt += '\n'
-		txt += 'Asterisk file used: '
-		txt += repr(self.coreLog)
-		txt += '\n'
-		txt += 'Time offset: '
-		txt += repr(self.timeOffset)
-		txt += '\n'
-		txt += 'Maximum radius of detection: '
-		txt += repr(self.maxRadius)
-		txt += ' meters\n\n'
-		txt += 'Overall detection percentage: '
-		txt += repr(self.detectionPercent)
-		txt += '\n'
-		txt += 'Overall accuracy (min, max, avg): '
-		txt += repr(self.minPositonalAccuracy)
-		txt += ' '
-		txt += repr(self.maxPositionalAccuracy)
-		txt += ' '
-		txt += repr(self.averagePositionalAccuracy)
-		txt += '\n'
-		txt += 'Overall ID change rate: '
-		txt += repr(self.idChanges)
-		txt += '\n'
-		txt += 'Overall percentage of points within maximum radius: '
-		txt += repr(self.percentWithinMaxRadius)
-		txt += '\n'
-		
-		f.write(txt)
-		f.close()
+        filename = self.txtDir + '/result_' + str(self.date.year) + '-' + str(self.date.month) + '-' + str(self.date.day) + '_' + str(self.date.hour) + '-' + str(self.date.minute) + '-' + str(self.date.second) + '.txt' 
+        #Sets up path and name for creation of .txt file
+        
+        f = open(filename, 'w')
+        
+        txt = 'Scenario ID: ' + str(self.scenarioID) + '\n'
+        txt += 'Date: ' + str(self.date) + '\n'
+        txt += 'Time taken: ' + str(datetime.utcnow() - self.date) + '\n'
+        txt += 'Video files used: '
+        #txt += repr(self.videoFileList) [#test.avi, test2.avi, etc.]
+        txt += '\n'
+        txt += 'GPS log files used: ' + str(self.gpsLog) + '\n'
+        txt += 'Asterisk file used: ' + str(self.coreLog) + '\n'
+        txt += 'Time offset: ' + str(self.timeOffset) + '\n'
+        txt += 'Maximum radius of detection: ' + str(self.maxRadius) + ' meters\n\n'
+        
+        txt += 'Overall testing results :\n'
+        txt = self.printIndividualResult(self.totalResult, txt)
+
+        for i in range(0, len(self.twentyMinuteResults)):
+            r = self.twentyMinuteResults[i]
+            txt += 'Results from ' + r.startTime[:2] + ':' + r.startTime[2:4] + ':' + r.startTime[4:]
+            txt += ' to ' + r.endTime[:2] + ':' + r.endTime[2:4] + ':' + r.endTime[4:] + '\n'
+            txt = self.printIndividualResult(r, txt)
+	
+        f.write(txt)
+        f.close()
+
+    #used by createDataSheet
+    def printIndividualResult(self, result, txt):
+        txt += 'Detection percentage: ' + str(result.detectionPercent) + '%\n'
+        txt += 'Positional accuracy (min, max, avg): ' + str(result.minPositonalAccuracy) + ', ' + str(result.maxPositionalAccuracy) + ', ' + str(result.averagePositionalAccuracy) + '\n'
+        txt += 'ID changes: ' + str(result.idChanges) + '\n'
+        txt += 'Percentage of points within maximum radius: ' + str(result.percentWithinMaxRadius) + '%\n\n'
+        return txt
 
     def export(self):
         f = open('path.kml', 'w')

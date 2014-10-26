@@ -12,12 +12,13 @@ def parseCoreLog(fileName):
 	for core_msg in tree.iterfind('CORE_MSG'):
 		tracknum = core_msg.findtext('TrackNum')
 		time = core_msg.attrib.get('UTC')
+		formattedTime = time[12:14] + time[15:17] + time[18:20] + '.' + time[21:24] #put time in the same format as the GPS file (HHMMSS.mmm)
 		for cart in core_msg:
 			if cart.tag == 'WGS84':
 				lat = cart.attrib.get('LAT')
 				lon = cart.attrib.get('LONG')
 				if tracknum > 0:
-					core_entries.append(Coordinate(time, tracknum, float(lon), float(lat)))
+					core_entries.append(Coordinate(formattedTime, tracknum, float(lon), float(lat)))
 	asterisk_entries = []
 	asterisk_entries = sorted(core_entries, key=attrgetter('tn', 'time'))
 	return asterisk_entries
