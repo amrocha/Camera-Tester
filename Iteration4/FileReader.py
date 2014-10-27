@@ -24,7 +24,7 @@ def parseCoreLog(fileName):
 	return asterisk_entries
 
 def parseGpsLog(fileName):
-	f = open('gps.log', 'r')
+	f = open(fileName, 'r')
 	gps_entries = list()
 	lines = list(f)
 	i = 0
