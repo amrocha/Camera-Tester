@@ -1,4 +1,5 @@
 import FileReader
+import FileWriter
 from Coordinate import Coordinate
 from MetricsResult import MetricsResult
 import subprocess, math
@@ -37,8 +38,8 @@ class Scenario:
         self.timeOffset = self.calculateTimeOffset()
         distances = self.comparePath()
         self.calculateMetrics(self.core_entries, distances)
-        self.createDataSheet()
-        self.export()
+        FileWriter.createDataSheet(self, self.totalResult, self.twentyMinuteResults)
+        FileWriter.export(gps_entries, core_entries)
         print "Minimum Distance"
         print min(distances)
         print "Maximum Distance"
@@ -104,7 +105,7 @@ class Scenario:
         for i in range(0, len(coreLogPath)):
             # if 20 minutes have passed, create the results. Then start the next twenty minute segment
             if (int(coreLogPath[i].time[2:4]) - int(timeSegmentStart[2:4]))%60 >= 20:
-                self.twentyMinuteResults.append(MetricsResult(i - timeSegmentStartIndex, timeSegmentStart, self.addTimeStamps(timeSegmentStart, '001959.999'),
+                self.twentyMinuteResults.append(self.createResult(i - timeSegmentStartIndex, timeSegmentStart, self.addTimeStamps(timeSegmentStart, '001959.999'),
                                                          numUndetected[0], numIDChanges[0], minDist[0], maxDist[0], totalDist[0], numAboveRadius[0]))
                 timeSegmentStartIndex = i
                 timeSegmentStart = self.addTimeStamps(timeSegmentStart, '002000.00')
@@ -143,13 +144,26 @@ class Scenario:
                     numAboveRadius[1] += 1
 
         #add last segment
-        self.twentyMinuteResults.append(MetricsResult(len(coreLogPath) - timeSegmentStartIndex, timeSegmentStart, coreLogPath[len(coreLogPath) - 1].time,
+        self.twentyMinuteResults.append(self.createResult(len(coreLogPath) - timeSegmentStartIndex, timeSegmentStart, coreLogPath[len(coreLogPath) - 1].time,
                                                  numUndetected[0], numIDChanges[0], minDist[0], maxDist[0], totalDist[0], numAboveRadius[0]))
         
         #create the total result
-        self.totalResult = MetricsResult(len(coreLogPath), coreLogPath[0].time[:4] + '00.000', coreLogPath[len(coreLogPath) - 1].time,
+        self.totalResult = self.createResult(len(coreLogPath), coreLogPath[0].time[:4] + '00.000', coreLogPath[len(coreLogPath) - 1].time,
                                          numUndetected[1], numIDChanges[1], minDist[1], maxDist[1], totalDist[1], numAboveRadius[1])
-        
+
+
+    #helper method for calculateMetrics
+    def createResult(self, length, startTime, endTime, numUndetected, numIDChanges, minDist, maxDist, totalDist, numAboveRadius):
+        detectionPercent = float(length - numUndetected) / length * 100
+        if length - numUndetected > 0:
+            averageDist = totalDist / float(length - numUndetected)
+            percentWithinMaxRadius = ((length - numUndetected) - numAboveRadius) / float(length - numUndetected) * 100
+        else:
+            averageDist = -1
+            percentWithinMaxRadius = -1
+        result = MetricsResult(startTime, endTime, detectionPercent, numIDChanges, minDist, maxDist, averageDist, percentWithinMaxRadius)
+        return result
+    
     #adds two timestamps of the format 'HHMMSS.mmm' 
     def addTimeStamps(self, time1, time2):
         second = float(time1[4:]) + float(time2[4:])
@@ -256,127 +270,4 @@ class Scenario:
 
         else:
             return None
-    """
-    To be called after the metrics have been calculated to output a
-    .txt file containing all the results
-    """
-    def createDataSheet(self):
-        filename = self.txtDir + '/result_' + str(self.date.year) + '-' + str(self.date.month) + '-' + str(self.date.day) + '_' + str(self.date.hour) + '-' + str(self.date.minute) + '-' + str(self.date.second) + '.txt' 
-        #Sets up path and name for creation of .txt file
-        
-        f = open(filename, 'w')
-        
-        txt = 'Scenario ID: ' + str(self.scenarioID) + '\n'
-        txt += 'Date: ' + str(self.date) + '\n'
-        txt += 'Time taken: ' + str(datetime.utcnow() - self.date) + '\n'
-        txt += 'Video files used: '
-        #txt += repr(self.videoFileList) [#test.avi, test2.avi, etc.]
-        txt += '\n'
-        txt += 'GPS log files used: ' + str(self.gpsLog) + '\n'
-        txt += 'Asterisk file used: ' + str(self.coreLog) + '\n'
-        txt += 'Time offset: ' + str(self.timeOffset) + '\n'
-        txt += 'Maximum radius of detection: ' + str(self.maxRadius) + ' meters\n\n'
-        
-        txt += 'Overall testing results :\n'
-        txt = self.printIndividualResult(self.totalResult, txt)
-
-        for i in range(0, len(self.twentyMinuteResults)):
-            r = self.twentyMinuteResults[i]
-            txt += 'Results from ' + r.startTime[:2] + ':' + r.startTime[2:4] + ':' + r.startTime[4:]
-            txt += ' to ' + r.endTime[:2] + ':' + r.endTime[2:4] + ':' + r.endTime[4:] + '\n'
-            txt = self.printIndividualResult(r, txt)
-	
-        f.write(txt)
-        f.close()
-
-    #used by createDataSheet
-    def printIndividualResult(self, result, txt):
-        txt += 'Detection percentage: ' + str(result.detectionPercent) + '%\n'
-        txt += 'Positional accuracy (min, max, avg): ' + str(result.minPositonalAccuracy) + ', ' + str(result.maxPositionalAccuracy) + ', ' + str(result.averagePositionalAccuracy) + '\n'
-        txt += 'ID changes: ' + str(result.idChanges) + '\n'
-        txt += 'Percentage of points within maximum radius: ' + str(result.percentWithinMaxRadius) + '%\n\n'
-        return txt
-
-    def export(self):
-        f = open('path.kml', 'w')
-        i = 0
-
-        kml =   '<?xml version="1.0" encoding="UTF-8"?>\n'
-        kml +=  '<kml xmlns="http://www.opengis.net/kml/2.2">\n'
-        kml +=      '<Document>\n'
-        kml +=          '<name>Paths</name>\n'
-        kml +=          '<description>Exported KML file with lines for the GPS and Asterix log files</description>\n'
-        kml +=          '<Style id="yellowLineGreenPoly">\n'
-        kml +=              '<LineStyle>\n'
-        kml +=                  '<color>7f00ffff</color>\n'
-        kml +=                  '<width>4</width>\n'
-        kml +=              '</LineStyle>\n'
-        kml +=              '<PolyStyle>\n'
-        kml +=                  '<color>7f00ff00</color>\n'
-        kml +=              '</PolyStyle>\n'
-        kml +=          '</Style>\n'
-        kml +=          '<Style id="redLineGreenPoly">\n'
-        kml +=              '<LineStyle>\n'
-        kml +=                  '<color>ff0000ff</color>\n'
-        kml +=                  '<width>4</width>\n'
-        kml +=              '</LineStyle>\n'
-        kml +=              '<PolyStyle>\n'
-        kml +=                  '<color>7f00ff00</color>\n'
-        kml +=              '</PolyStyle>\n'
-        kml +=          '</Style>\n'
-        kml +=          '<Placemark>'
-        kml +=              '<name>GPS Log Path</name>'
-        kml +=              '<description>Path generated by the GPS log</description>'
-        kml +=              '<styleUrl>#yellowLineGreenPoly</styleUrl>'
-        kml +=              '<LineString>'
-        kml +=                  '<extrude>1</extrude>'
-        kml +=                  '<tessellate>1</tessellate>'
-        kml +=                  '<altitudeMode>absolute</altitudeMode>'
-        kml +=                  '<coordinates>'
-        for entry in self.gps_entries:
-            kml += repr(entry.longitude)
-            kml += ','
-            kml += repr(entry.latitude)
-            kml += ',0\n'
-        kml +=                  '</coordinates>'
-        kml +=              '</LineString>'
-        kml +=          '</Placemark>'
-
-		#Iterates over the number of asterisk file entries
-        while (i < len(self.core_entries)):
-            kml +=          '<Placemark>'
-            kml +=              '<name>Core Log TrackNum:'
-            kml +=				repr(self.core_entries[i].tn)
-            kml +=				'</name>'
-            kml +=              '<description>Path generated by the Core log</description>'
-            kml +=              '<styleUrl>#redLineGreenPoly</styleUrl>'
-            kml +=              '<LineString>'
-            kml +=                  '<extrude>1</extrude>'
-            kml +=                  '<tessellate>1</tessellate>'
-            kml +=                  '<altitudeMode>absolute</altitudeMode>'
-            kml +=                  '<coordinates>'
-            #Enters the first coordinates of a new track number
-            kml += repr(self.core_entries[i].longitude)
-            kml += ','
-            kml += repr (self.core_entries[i].latitude)
-            kml += ',0\n'
-            i += 1
-            #If the track number changes, stop the loop, and create a new line
-            if(i < len(self.core_entries)):
-                while (self.core_entries[i-1].tn == self.core_entries[i].tn):
-                    print i
-                    kml += repr(self.core_entries[i].longitude)
-                    kml += ','
-                    kml += repr(self.core_entries[i].latitude)
-                    kml += ',0\n'
-                    i += 1
-                    if(i >= len(self.core_entries)):
-                        break;
-            kml +=                  '</coordinates>'
-            kml +=              '</LineString>'
-            kml +=          '</Placemark>'
-        kml +=      '</Document>\n'
-        kml += '</kml>\n'
-
-        f.write(kml)
-        f.close()
+   
