@@ -31,7 +31,7 @@ distances.append(4.3)
 distances.append(7.7) #ignored
 distances.append(6.3)
 
-scenario = Scenario(1, 5.0, sys.path[0], '')
+scenario = Scenario(1, 5.0, '', '')
 scenario.calculateMetrics(coreLogPath, distances)
 
 print 'Overall Results'
@@ -47,14 +47,12 @@ print 'Percent within ', scenario.maxRadius, 'm: ', scenario.totalResult.percent
 #20 minute segments
 print '\nNumber of 20 minute segments: ', len(scenario.twentyMinuteResults)
 for i in range(0, len(scenario.twentyMinuteResults)):                                                                   #expected: four 20 minute segments
-    print '\nStart Time: ', scenario.twentyMinuteResults[i].startTime                                                   #expected: 230000.000, 232000.000, 234000.000, 000000.000
-    print 'End Time: ', scenario.twentyMinuteResults[i].endTime                                                         #expected: 231959.999, 233959.999, 235959.999. 001301.000
-    print 'Detection percent: ', scenario.twentyMinuteResults[i].detectionPercent, '%'                                  #expected: 66.666...%, 0%, 100%, 66.666...%
-    print 'Min distance', scenario.twentyMinuteResults[i].minPositonalAccuracy                                          #expected: 5.3, 99999, 2.1, 4.3
-    print 'Max distance', scenario.twentyMinuteResults[i].maxPositionalAccuracy                                         #expected: 6.6, -1, 7.5, 6.3
-    print 'Average postional Accuracy', scenario.twentyMinuteResults[i].averagePositionalAccuracy                       #expected: 5.95, -1, 4.8, 5.3
-    print 'ID changes: ', scenario.twentyMinuteResults[i].idChanges                                                     #expected: 0, -1, 1, 1 
-    print 'Percent within ', scenario.maxRadius, 'm: ', scenario.twentyMinuteResults[i].percentWithinMaxRadius, '%'     #expected  0%, -1%, 50%, 50%
+    print '\nStart Time: ', scenario.twentyMinuteResults[i].startTime                                                   #expected: 230000.000, 232000.000, 234000.000,  000000.000
+    print 'End Time: ', scenario.twentyMinuteResults[i].endTime                                                         #expected: 231959.999, 233959.999, 235959.999,  001301.000
+    print 'Detection percent: ', scenario.twentyMinuteResults[i].detectionPercent, '%'                                  #expected: 66.666...%, 0%,         100%,        66.666...%
+    print 'Min distance', scenario.twentyMinuteResults[i].minPositonalAccuracy                                          #expected: 5.3,        99999,      2.1,         4.3
+    print 'Max distance', scenario.twentyMinuteResults[i].maxPositionalAccuracy                                         #expected: 6.6,        -1,         7.5,         6.3
+    print 'Average postional Accuracy', scenario.twentyMinuteResults[i].averagePositionalAccuracy                       #expected: 5.95,       -1,         4.8,         5.3
+    print 'ID changes: ', scenario.twentyMinuteResults[i].idChanges                                                     #expected: 0,          -1,         1,           1 
+    print 'Percent within ', scenario.maxRadius, 'm: ', scenario.twentyMinuteResults[i].percentWithinMaxRadius, '%'     #expected  0%,         -1%,        50%,         50%
 
-scenario.createDataSheet()
-print '\nData sheet created'
