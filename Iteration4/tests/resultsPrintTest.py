@@ -6,7 +6,7 @@ from MetricsResult import MetricsResult
 import FileWriter
 
  
-scenario = Scenario(1, 5.0, sys.path[0], 'example_gps.log', 'example_core.log', 4)  
+scenario = Scenario(1, 5.0, sys.path[0], '', 'example_gps.log', 'example_core.log', 4)  
 
 totalResult = MetricsResult('230000.000', '001301.000', 60, 4, 2.1, 7.5, 5.35, 33.333)
 

@@ -21,10 +21,11 @@ class Scenario:
     timeOffset: the timestamp difference used to compare points in time between the two log files
     maxRadius: the maximum distance a point from the core log can be from a corresponding gps log point for it to be considered accurate
     """
-    def __init__ (self, scenarioID, maxRadius, txtDir, gpsLog, coreLog=None, timeOffset=None):
+    def __init__ (self, scenarioID, maxRadius, txtDir, kmlDir, gpsLog, coreLog=None, timeOffset=None):
         self.scenarioID = scenarioID
         self.date = datetime.utcnow()
         self.txtDir = txtDir
+        self.kmlDir = kmlDir
         self.coreLog = coreLog
         self.gpsLog = gpsLog
         self.timeOffset = timeOffset
@@ -39,7 +40,7 @@ class Scenario:
         distances = self.comparePath()
         self.calculateMetrics(self.core_entries, distances)
         FileWriter.createDataSheet(self, self.totalResult, self.twentyMinuteResults)
-        FileWriter.export(gps_entries, core_entries)
+        FileWriter.export(self, self.gps_entries, self.core_entries)
         print "Minimum Distance"
         print min(distances)
         print "Maximum Distance"

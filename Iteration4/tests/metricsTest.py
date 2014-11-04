@@ -31,7 +31,7 @@ distances.append(4.3)
 distances.append(7.7) #ignored
 distances.append(6.3)
 
-scenario = Scenario(1, 5.0, '', '')
+scenario = Scenario(1, 5.0, '', '', '')
 scenario.calculateMetrics(coreLogPath, distances)
 
 print 'Overall Results'

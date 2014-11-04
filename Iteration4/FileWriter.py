@@ -43,8 +43,11 @@ def printIndividualResult(result, txt):
         txt += 'Percentage of points within maximum radius: ' + str(result.percentWithinMaxRadius) + '%\n\n'
         return txt
 
-def export(gps_entries, core_entries):
-        f = open('path.kml', 'w')
+def export(scenario, gps_entries, core_entries):
+        d = scenario.date
+        filename = scenario.kmlDir + '/export_' + str(d.year) + '-' + str(d.month) + '-' + str(d.day) + '_' + str(d.hour) + '-' + str(d.minute) + '-' + str(d.second) + '.kml' 
+        
+        f = open(filename, 'w')
         i = 0
 
         kml =   '<?xml version="1.0" encoding="UTF-8"?>\n'
