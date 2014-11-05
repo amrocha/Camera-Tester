@@ -10,3 +10,5 @@ scenario = Scenario(1, 5.0, '', sys.path[0], '')
 gps_entries = FileReader.parseGpsLog('kmlPrintTestGpsFile.log')
 core_entries = FileReader.parseCoreLog('kmlPrintTestCoreFile.log')
 FileWriter.export(scenario, gps_entries, core_entries)
+
+print 'kml file printed successfully'

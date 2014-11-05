@@ -18,7 +18,7 @@ twentyMinuteResults.append(MetricsResult('001301.000', '001301.000', 66.666, 4.3
 
 FileWriter.createDataSheet(scenario, totalResult, twentyMinuteResults)
 
-print 'File printed successfully'
+print 'Results file printed successfully'
 
 """
 EXPECTED: taken from first successful test

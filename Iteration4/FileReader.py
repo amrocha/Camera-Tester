@@ -1,11 +1,16 @@
 import xml.etree.ElementTree as et
 from Coordinate import Coordinate
 from operator import itemgetter, attrgetter
+from xml.etree.ElementTree import ParseError
 
 def parseCoreLog(fileName):
 
-	with open(fileName, 'rt') as file:
-		tree = et.parse(file)
+        try:
+                with open(fileName, 'rt') as file:
+                        tree = et.parse(file)
+        except (ParseError, IOError), e:
+                print 'An error occurred while reading the core log file: ', str(e)
+                return -1
 
 	core_entries = []
 
@@ -24,22 +29,33 @@ def parseCoreLog(fileName):
 	return asterisk_entries
 
 def parseGpsLog(fileName):
-	f = open(fileName, 'r')
+        try:
+                f = open(fileName, 'r')
+        except IOError, e:
+                print 'An error occurred while reading the core log file: ', str(e)
+                return -1
+        
 	gps_entries = list()
 	lines = list(f)
 	i = 0
 	j = -1
 	start = False
-	while i < len(lines):
-		p = lines[i].split(',')
-		if p[0] == "$GPGGA":
-			start = True
-			j += 1
-			d1 = p[4][:3]
-			m1 = p[4][3:]
-			d2 = p[2][:2]
-			m2 = p[2][2:]
-			gps_entries.append(Coordinate(p[1], None, float(d1) + (float(m1)/60), float(d2) + (float(m2)/60)))
-		i += 1
+
+        while i < len(lines):
+                try:
+                        p = lines[i].split(',')
+                        if p[0] == "$GPGGA":
+                                start = True
+                                j += 1
+                                d1 = p[4][:3]
+                                m1 = p[4][3:]
+                                d2 = p[2][:2]
+                                m2 = p[2][2:]
+                                gps_entries.append(Coordinate(p[1], None, float(d1) + (float(m1)/60), float(d2) + (float(m2)/60)))
+                        i += 1
+                except IndexError:
+                        print 'An error occurred while reading the GPS file: A $GPGGA entry at line', i, 'does not have the correct number of elements'
+                        return -1
+
 	return gps_entries
 

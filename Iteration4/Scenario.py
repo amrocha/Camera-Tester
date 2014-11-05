@@ -35,7 +35,12 @@ class Scenario:
         if self.coreLog == None:
             self.coreLog = self.runCamSim()
         self.core_entries = FileReader.parseCoreLog(self.coreLog)
+        if(self.core_entries == -1):
+            return
         self.gps_entries = FileReader.parseGpsLog(self.gpsLog)
+        if(self.gps_entries == -1):
+            return
+        
         self.timeOffset = self.calculateTimeOffset()
         distances = self.comparePath()
         self.calculateMetrics(self.core_entries, distances)
