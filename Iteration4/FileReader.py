@@ -7,7 +7,10 @@ def parseCoreLog(fileName):
 
         try:
                 with open(fileName, 'rt') as file:
-                        tree = et.parse(file)
+					xml = '<XML>'
+					xml += file.read()
+					xml += '</XML>'
+					tree = et.fromstring(xml)
         except (ParseError, IOError), e:
                 print 'An error occurred while reading the core log file: ', str(e)
                 return -1
