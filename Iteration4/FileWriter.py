@@ -15,7 +15,7 @@ def createDataSheet(scenario, totalResult, twentyMinuteResults):
         f = open(filename, 'w')
 
         txt = 'Scenario ID: ' + str(scenario.scenarioID) + '\n'
-        txt += 'Date: ' + str(d) + '\n'
+        txt += 'Date (UTC): ' + str(d) + '\n'
         txt += 'Time taken: ' + str(datetime.utcnow() - d) + '\n'
         #txt += 'Video files used: ' + str(scenario.videoFileList) + '\n' [#test.avi, test2.avi, etc.]
         txt += 'GPS log files used: ' + str(scenario.gpsLog) + '\n'
