@@ -113,7 +113,6 @@ def export(scenario, gps_entries, core_entries):
                 #If the track number changes, stop the loop, and create a new line
                 if(i < len(core_entries)):
                         while (core_entries[i-1].tn == core_entries[i].tn):
-                                print i
                                 kml += repr(core_entries[i].longitude)
                                 kml += ','
                                 kml += repr(core_entries[i].latitude)

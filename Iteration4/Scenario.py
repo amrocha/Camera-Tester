@@ -204,7 +204,10 @@ class Scenario:
         
         return hour + minute + second
 
-    #this will compare the files and output the result
+    #This function goes through all core points and compares them to the closes gps points
+    #then puts the results in a list
+    #Need to change so it compares by core path and returns a list of lists
+
     def comparePath(self):
         pointList = list()
         for point in self.core_entries:
@@ -212,15 +215,28 @@ class Scenario:
 
         return pointList
 
-
+    #Let's try to make sense of this clusterfuck since I didn't comment when I wrote it
+    #Goal is finding the minimum distance to the GPS path, return that
     def comparePoints(self, c):
-        minDist = 99999
+        minDist = 99999     #Initial value for minDist has to be maximum value possible, so it always goes down
         point1 = None
         point2 = None
         point3 = None
+
+        def Pythagoras (x1, y1, x2, y2):
+            return math.sqrt(math.pow((x2 - x1), 2)+ math.pow((y2 - y1), 2))
+
+        #Compare all points in the GPS logs to the point c given
+        #find closest point
+
         for (i, x) in enumerate(self.gps_entries):
-            dist = math.sqrt(pow(c.longitude -  x.longitude, 2) + pow(c.latitude -  x.latitude, 2))
+
+            dist = Pythagoras(x.longitude, x.latitude, c.longitude, c.latitude)
             if(dist < minDist):
+                point1 = None
+                point2 = None
+                point3 = None
+
                 minDist = dist
                 point1 = x;
                 if(i < len(self.gps_entries)-1):
@@ -228,8 +244,6 @@ class Scenario:
                 if(i > 0):
                     point3 = self.gps_entries[i-1]
 
-        def Pythagoras (x1, y1, x2, y2):
-            return math.sqrt(math.pow((x2 - x1), 2)+ math.pow((y2 - y1), 2))
 
         def DistancePointLine (px, py, x1, y1, x2, y2):
             if(x1 == x2 and y1 == y2):
@@ -240,8 +254,8 @@ class Scenario:
             u = u1 / (lineLength * lineLength)
 
             if (u < 0) or (u > 1):
-                #// closest point does not fall within the line segment, take the shorter distance
-                #// to an endpoint
+                #closest point does not fall within the line segment, take the shorter distance
+                #to an endpoint
                 ix = Pythagoras(px, py, x1, y1)
                 iy = Pythagoras(px, py, x2, y2)
                 if ix > iy:
@@ -260,10 +274,10 @@ class Scenario:
             if point2 is None and point3 is not None:
                 minDist = DistancePointLine(c.longitude, c.latitude, point1.longitude, point1.latitude, point3.longitude, point3.latitude)
 
-            elif point3 is None and point2 is not None:
+            elif point2 is not None and point3 is None:
                 minDist = DistancePointLine(c.longitude, c.latitude, point1.longitude, point1.latitude, point2.longitude, point2.latitude)
 
-            elif point3 is None and point3 is None:
+            elif point2 is None and point3 is None:
                 minDist = Pythagoras(c.longitude, c.latitude, point1.longitude, point1.latitude)
 
             else:
@@ -271,7 +285,6 @@ class Scenario:
                     DistancePointLine(c.longitude, c.latitude, point1.longitude, point1.latitude, point2.longitude, point2.latitude),
                     DistancePointLine(c.longitude, c.latitude, point1.longitude, point1.latitude, point3.longitude, point3.latitude)
                 )
-
             return minDist
 
         else:

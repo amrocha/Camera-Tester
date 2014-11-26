@@ -1,14 +1,10 @@
-#Test 1
-#Files:
-# - gps.log
-# - Corefile.log
-#Expected Results:
-# - To be filled out later
 import os.path, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 
 from Scenario import Scenario
+from MetricsResult import MetricsResult
+import FileWriter
 
-s = Scenario(1, 8, 'gps.log', 'Corefile.log')
+print sys.path[0]
+s = Scenario(1, 5.0, sys.path[0], '', sys.path[0]+'\\package\\gps\\24042014day_rny13.log', sys.path[0]+'\\package\\core\\day\\2014-04-24_05-00-00__Core 1 Archiver_.log', 4) 
 s.run()
-#s.export()
