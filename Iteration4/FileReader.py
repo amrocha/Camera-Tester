@@ -50,7 +50,7 @@ def parseGpsLog(fileName):
         try:
                 f = open(fileName, 'r')
         except IOError, e:
-                print 'An error occurred while reading the core log file: ', str(e)
+                print 'An error occurred while reading the GPS log file: ', str(e)
                 return -1
         
 	gps_entries = list()
@@ -72,7 +72,7 @@ def parseGpsLog(fileName):
                                 gps_entries.append(Coordinate(p[1], None, float(d1) + (float(m1)/60), float(d2) + (float(m2)/60)))
                         i += 1
                 except IndexError:
-                        print 'An error occurred while reading the GPS file: A $GPGGA entry at line', i, 'does not have the correct number of elements'
+                        print 'An error occurred while reading the GPS log file: A $GPGGA entry at line', i, 'does not have the correct number of elements'
                         return -1
 
 	return gps_entries
