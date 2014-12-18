@@ -5,9 +5,6 @@ from Scenario import Scenario
 from MetricsResult import MetricsResult
 import FileWriter
 
- 
-scenario = Scenario(1, 5.0, sys.path[0], '', 'example_gps.log', 'example_core.log', 4)  
-
 totalResult = MetricsResult('230000.000', '001301.000', 60, 4, 2.1, 7.5, 5.35, 33.333)
 
 twentyMinuteResults = list()
@@ -16,9 +13,10 @@ twentyMinuteResults.append(MetricsResult('232000.000', '233959.999', 0, 99999, -
 twentyMinuteResults.append(MetricsResult('234000.000', '235959.999', 100, 2.1, 7.5, 4.8, 1, 50))
 twentyMinuteResults.append(MetricsResult('001301.000', '001301.000', 66.666, 4.3, 6.3, 5.3, 1, 50))
 
+print 'Test1: Valid input'
+scenario = Scenario(1, 5.0, sys.path[0], '', 'example_gps.log', 'example_core.log', 4)  
 FileWriter.createDataSheet(scenario, totalResult, twentyMinuteResults)
-
-print 'Results file printed successfully'
+print 'Results file printed successfully\n'
 
 """
 EXPECTED: taken from first successful test
@@ -61,3 +59,32 @@ Positional accuracy (min, max, avg): 6.3, 5.3, 1
 ID changes: 4.3
 Percentage of points within maximum radius: 50%
 """
+
+
+print 'Test2: None value scenarios'
+try:
+    scenario = Scenario(1, 5.0, sys.path[0], '', 'example_gps.log', 'example_core.log', 4) 
+    FileWriter.createDataSheet(scenario, totalResult, None)
+    print 'Test failed: None value for twentyMinuteResults did not throw error'
+except (TypeError), e:
+    print 'Error thrown successfully for None value for twentyMinuteResults'
+try:
+    scenario = Scenario(1, 5.0, sys.path[0], '', 'example_gps.log', 'example_core.log', 4) 
+    FileWriter.createDataSheet(scenario, None, twentyMinuteResults)
+    print 'Test failed: None value for totalResult did not throw error'
+except (TypeError, AttributeError), e:
+    print 'Error thrown successfully for None value for totalResult'
+try:
+    scenario = Scenario(1, 5.0, sys.path[0], '', 'example_gps.log', 'example_core.log', 4) 
+    FileWriter.createDataSheet(None, totalResult, twentyMinuteResults)
+    print 'Test failed: None value for Scenario object did not throw error'
+except (TypeError, AttributeError), e:
+    print 'Error thrown successfully for None value for Scenario object'
+
+
+
+
+
+
+
+

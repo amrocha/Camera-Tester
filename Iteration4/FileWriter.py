@@ -9,10 +9,6 @@ To be called after the metrics have been calculated to output a
 """
 def createDataSheet(scenario, totalResult, twentyMinuteResults):
         d = scenario.date
-        filename = scenario.txtDir + '/result_' + str(d.year) + '-' + str(d.month) + '-' + str(d.day) + '_' + str(d.hour) + '-' + str(d.minute) + '-' + str(d.second) + '.txt' 
-        #Sets up path and name for creation of .txt file
-
-        f = open(filename, 'w')
 
         txt = 'Scenario ID: ' + str(scenario.scenarioID) + '\n'
         txt += 'Date (UTC): ' + str(d) + '\n'
@@ -32,6 +28,9 @@ def createDataSheet(scenario, totalResult, twentyMinuteResults):
                 txt += ' to ' + result.endTime[:2] + ':' + result.endTime[2:4] + ':' + result.endTime[4:] + '\n'
                 txt = printIndividualResult(result, txt)
 
+        #open and write file
+        filename = scenario.txtDir + '/result_' + str(d.year) + '-' + str(d.month) + '-' + str(d.day) + '_' + str(d.hour) + '-' + str(d.minute) + '-' + str(d.second) + '-' + str(d.microsecond) + '.txt' 
+        f = open(filename, 'w')
         f.write(txt)
         f.close()
 
@@ -45,9 +44,7 @@ def printIndividualResult(result, txt):
 
 def export(scenario, gps_entries, core_entries):
         d = scenario.date
-        filename = scenario.kmlDir + '/export_' + str(d.year) + '-' + str(d.month) + '-' + str(d.day) + '_' + str(d.hour) + '-' + str(d.minute) + '-' + str(d.second) + '.kml' 
-        
-        f = open(filename, 'w')
+
         i = 0
 
         kml =   '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -126,5 +123,9 @@ def export(scenario, gps_entries, core_entries):
         kml +=      '</Document>\n'
         kml += '</kml>\n'
 
+
+        #open and write file
+        filename = scenario.kmlDir + '/export_' + str(d.year) + '-' + str(d.month) + '-' + str(d.day) + '_' + str(d.hour) + '-' + str(d.minute) + '-' + str(d.second) + '-' + str(d.microsecond) + '.kml' 
+        f = open(filename, 'w')
         f.write(kml)
         f.close()
