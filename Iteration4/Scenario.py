@@ -34,7 +34,7 @@ class Scenario:
     def run(self):
         if self.coreLog == None:
             self.coreLog = self.runCamSim()
-        self.core_entries = FileReader.parseCoreLog(self.coreLog)
+        self.core_entries = FileReader.parseCoreLogs(self.coreLog)
         if(self.core_entries == -1):
             return
         self.gps_entries = FileReader.parseGpsLog(self.gpsLog)
@@ -87,6 +87,8 @@ class Scenario:
     this may need to be changed depending on how the path comparison is implemented
     """
     def calculateMetrics(self, coreLogPath, pathDistances):
+        print coreLogPath
+        print pathDistances
         #all counters with an array of length two have the twenty minute segment counter at index 0 and the total counter at index 1
         #index 0 resets every twenty minutes of footage
         

@@ -1,10 +1,24 @@
+import os
 import xml.etree.ElementTree as et
 from Coordinate import Coordinate
 from operator import itemgetter, attrgetter
 from xml.etree.ElementTree import ParseError
 
-def parseCoreLog(fileName):
+def parseCoreLogs(folderName):
+        try:
+                fileList = os.listdir(folderName)
+        except WindowsError:
+                print 'Not a directory. Assuming file.'
+                fileList = list([folderName])
 
+        asteriskEntries = list()
+        for f in fileList:
+                asteriskEntries = parseCoreLog(folderName+f, asteriskEntries)
+
+        return asteriskEntries
+
+def parseCoreLog(fileName, partial_entries=list()):
+        print fileName
         try:
                 with open(fileName, 'rt') as file:
 					xml = '<XML>'
@@ -28,6 +42,7 @@ def parseCoreLog(fileName):
 				if tracknum > 0:
 					core_entries.append(Coordinate(formattedTime, tracknum, float(lon), float(lat)))
 	asterisk_entries = []
+        core_entries.extend(partial_entries)
 	asterisk_entries = sorted(core_entries, key=attrgetter('tn', 'time'))
 	return asterisk_entries
 
