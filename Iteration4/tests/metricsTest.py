@@ -42,7 +42,7 @@ print 'ID changes: ', scenario.totalResult.idChanges                            
 print 'Min distance', scenario.totalResult.minPositonalAccuracy                                         #expected: 2.1
 print 'Max distance', scenario.totalResult.maxPositionalAccuracy                                        #expected: 7.5
 print 'Average postional Accuracy', scenario.totalResult.averagePositionalAccuracy                      #expected: 5.35
-print 'Percent within ', scenario.maxRadius, 'm: ', scenario.totalResult.percentWithinMaxRadius, '%'    #expected 33.333...%
+print 'Percent within ', scenario.maxRadius, 'm: ', scenario.totalResult.percentWithinMaxRadius, '%'    #expected: 33.333...%
 
 #20 minute segments
 print '\nNumber of 20 minute segments: ', len(scenario.twentyMinuteResults)
@@ -54,5 +54,5 @@ for i in range(0, len(scenario.twentyMinuteResults)):                           
     print 'Max distance', scenario.twentyMinuteResults[i].maxPositionalAccuracy                                         #expected: 6.6,        -1,         7.5,         6.3
     print 'Average postional Accuracy', scenario.twentyMinuteResults[i].averagePositionalAccuracy                       #expected: 5.95,       -1,         4.8,         5.3
     print 'ID changes: ', scenario.twentyMinuteResults[i].idChanges                                                     #expected: 0,          -1,         1,           1 
-    print 'Percent within ', scenario.maxRadius, 'm: ', scenario.twentyMinuteResults[i].percentWithinMaxRadius, '%'     #expected  0%,         -1%,        50%,         50%
+    print 'Percent within ', scenario.maxRadius, 'm: ', scenario.twentyMinuteResults[i].percentWithinMaxRadius, '%'     #expected: 0%,         -1%,        50%,         50%
 
