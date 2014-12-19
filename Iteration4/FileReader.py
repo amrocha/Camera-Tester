@@ -15,10 +15,21 @@ def parseCoreLogs(folderName):
         for f in fileList:
                 asteriskEntries = parseCoreLog(folderName+f, asteriskEntries)
 
-        return asteriskEntries
+        path = []
+        tracknum = None
+        pathList = []
+        for entry in asteriskEntries:
+                if(tracknum != entry.tn):
+                        tracknum = entry.tn
+                        if(path):
+                                pathList.append(path)
+                        path = []
+                path.append(entry)
+
+        return pathList
 
 def parseCoreLog(fileName, partial_entries=list()):
-        print fileName
+        print "Opening " + fileName
         try:
                 with open(fileName, 'rt') as file:
 					xml = '<XML>'
@@ -44,7 +55,8 @@ def parseCoreLog(fileName, partial_entries=list()):
 	asterisk_entries = []
         core_entries.extend(partial_entries)
 	asterisk_entries = sorted(core_entries, key=attrgetter('tn', 'time'))
-	return asterisk_entries
+
+        return asterisk_entries
 
 def parseGpsLog(fileName):
         try:

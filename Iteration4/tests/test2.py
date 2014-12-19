@@ -6,5 +6,5 @@ from MetricsResult import MetricsResult
 import FileWriter
 
 print sys.path[0]
-s = Scenario(1, 5.0, sys.path[0], '', sys.path[0]+'\\package\\gps\\24042014day_rny13.log', sys.path[0]+'\\package\\core\\day\\', 4) 
+s = Scenario(1, 5.0, sys.path[0], '.', sys.path[0]+'\\package\\gps\\24042014day_rny23.log', sys.path[0]+'\\package\\core\\day\\', 4) 
 s.run()

@@ -8,124 +8,114 @@ To be called after the metrics have been calculated to output a
 .txt file containing all the results
 """
 def createDataSheet(scenario, totalResult, twentyMinuteResults):
-        d = scenario.date
+	d = scenario.date
 
-        txt = 'Scenario ID: ' + str(scenario.scenarioID) + '\n'
-        txt += 'Date (UTC): ' + str(d) + '\n'
-        txt += 'Time taken: ' + str(datetime.utcnow() - d) + '\n'
-        #txt += 'Video files used: ' + str(scenario.videoFileList) + '\n' [#test.avi, test2.avi, etc.]
-        txt += 'GPS log files used: ' + str(scenario.gpsLog) + '\n'
-        txt += 'Asterisk file used: ' + str(scenario.coreLog) + '\n'
-        txt += 'Time offset: ' + str(scenario.timeOffset) + '\n'
-        txt += 'Maximum radius of detection: ' + str(scenario.maxRadius) + ' meters\n\n'
+	txt = 'Scenario ID: ' + str(scenario.scenarioID) + '\n'
+	txt += 'Date (UTC): ' + str(d) + '\n'
+	txt += 'Time taken: ' + str(datetime.utcnow() - d) + '\n'
+	#txt += 'Video files used: ' + str(scenario.videoFileList) + '\n' [#test.avi, test2.avi, etc.]
+	txt += 'GPS log files used: ' + str(scenario.gpsLog) + '\n'
+	txt += 'Asterisk file used: ' + str(scenario.coreLog) + '\n'
+	txt += 'Time offset: ' + str(scenario.timeOffset) + '\n'
+	txt += 'Maximum radius of detection: ' + str(scenario.maxRadius) + ' meters\n\n'
 
-        txt += 'Overall testing results :\n'
-        txt = printIndividualResult(totalResult, txt)
+	txt += 'Overall testing results :\n'
+	txt = printIndividualResult(totalResult, txt)
 
-        for i in range(0, len(twentyMinuteResults)):
-                result = twentyMinuteResults[i]
-                txt += 'Results from ' + result.startTime[:2] + ':' + result.startTime[2:4] + ':' + result.startTime[4:]
-                txt += ' to ' + result.endTime[:2] + ':' + result.endTime[2:4] + ':' + result.endTime[4:] + '\n'
-                txt = printIndividualResult(result, txt)
+	for i in range(0, len(twentyMinuteResults)):
+			result = twentyMinuteResults[i]
+			txt += 'Results from ' + result.startTime[:2] + ':' + result.startTime[2:4] + ':' + result.startTime[4:]
+			txt += ' to ' + result.endTime[:2] + ':' + result.endTime[2:4] + ':' + result.endTime[4:] + '\n'
+			txt = printIndividualResult(result, txt)
 
-        #open and write file
-        filename = scenario.txtDir + '/result_' + str(d.year) + '-' + str(d.month) + '-' + str(d.day) + '_' + str(d.hour) + '-' + str(d.minute) + '-' + str(d.second) + '-' + str(d.microsecond) + '.txt' 
-        f = open(filename, 'w')
-        f.write(txt)
-        f.close()
+	#open and write file
+	filename = scenario.txtDir + '/result_' + str(d.year) + '-' + str(d.month) + '-' + str(d.day) + '_' + str(d.hour) + '-' + str(d.minute) + '-' + str(d.second) + '-' + str(d.microsecond) + '.txt' 
+	f = open(filename, 'w')
+	f.write(txt)
+	f.close()
 
 #used by createDataSheet
 def printIndividualResult(result, txt):
-        txt += 'Detection percentage: ' + str(result.detectionPercent) + '%\n'
-        txt += 'Positional accuracy (min, max, avg): ' + str(result.minPositonalAccuracy) + ', ' + str(result.maxPositionalAccuracy) + ', ' + str(result.averagePositionalAccuracy) + '\n'
-        txt += 'ID changes: ' + str(result.idChanges) + '\n'
-        txt += 'Percentage of points within maximum radius: ' + str(result.percentWithinMaxRadius) + '%\n\n'
-        return txt
+	txt += 'Detection percentage: ' + str(result.detectionPercent) + '%\n'
+	txt += 'Positional accuracy (min, max, avg): ' + str(result.minPositonalAccuracy) + ', ' + str(result.maxPositionalAccuracy) + ', ' + str(result.averagePositionalAccuracy) + '\n'
+	txt += 'ID changes: ' + str(result.idChanges) + '\n'
+	txt += 'Percentage of points within maximum radius: ' + str(result.percentWithinMaxRadius) + '%\n\n'
+	return txt
 
-def export(scenario, gps_entries, core_entries):
-        d = scenario.date
+def export(scenario, gpsPath, pathList):
+	d = scenario.date
 
-        i = 0
+	i = 0
 
-        kml =   '<?xml version="1.0" encoding="UTF-8"?>\n'
-        kml +=  '<kml xmlns="http://www.opengis.net/kml/2.2">\n'
-        kml +=      '<Document>\n'
-        kml +=          '<name>Paths</name>\n'
-        kml +=          '<description>Exported KML file with lines for the GPS and Asterix log files</description>\n'
-        kml +=          '<Style id="yellowLineGreenPoly">\n'
-        kml +=              '<LineStyle>\n'
-        kml +=                  '<color>7f00ffff</color>\n'
-        kml +=                  '<width>4</width>\n'
-        kml +=              '</LineStyle>\n'
-        kml +=              '<PolyStyle>\n'
-        kml +=                  '<color>7f00ff00</color>\n'
-        kml +=              '</PolyStyle>\n'
-        kml +=          '</Style>\n'
-        kml +=          '<Style id="redLineGreenPoly">\n'
-        kml +=              '<LineStyle>\n'
-        kml +=                  '<color>ff0000ff</color>\n'
-        kml +=                  '<width>4</width>\n'
-        kml +=              '</LineStyle>\n'
-        kml +=              '<PolyStyle>\n'
-        kml +=                  '<color>7f00ff00</color>\n'
-        kml +=              '</PolyStyle>\n'
-        kml +=          '</Style>\n'
-        kml +=          '<Placemark>'
-        kml +=              '<name>GPS Log Path</name>'
-        kml +=              '<description>Path generated by the GPS log</description>'
-        kml +=              '<styleUrl>#yellowLineGreenPoly</styleUrl>'
-        kml +=              '<LineString>'
-        kml +=                  '<extrude>1</extrude>'
-        kml +=                  '<tessellate>1</tessellate>'
-        kml +=                  '<altitudeMode>absolute</altitudeMode>'
-        kml +=                  '<coordinates>'
-        for entry in gps_entries:
-                kml += repr(entry.longitude)
-                kml += ','
-                kml += repr(entry.latitude)
-                kml += ',0\n'
-        kml +=                  '</coordinates>'
-        kml +=              '</LineString>'
-        kml +=          '</Placemark>'
+	kml =   '<?xml version="1.0" encoding="UTF-8"?>\n'
+	kml +=  '<kml xmlns="http://www.opengis.net/kml/2.2">\n'
+	kml +=      '<Document>\n'
+	kml +=          '<name>Paths</name>\n'
+	kml +=          '<description>Exported KML file with lines for the GPS and Asterix log files</description>\n'
+	kml +=          '<Style id="yellowLineGreenPoly">\n'
+	kml +=              '<LineStyle>\n'
+	kml +=                  '<color>7f00ffff</color>\n'
+	kml +=                  '<width>4</width>\n'
+	kml +=              '</LineStyle>\n'
+	kml +=              '<PolyStyle>\n'
+	kml +=                  '<color>7f00ff00</color>\n'
+	kml +=              '</PolyStyle>\n'
+	kml +=          '</Style>\n'
+	kml +=          '<Style id="redLineGreenPoly">\n'
+	kml +=              '<LineStyle>\n'
+	kml +=                  '<color>ff0000ff</color>\n'
+	kml +=                  '<width>4</width>\n'
+	kml +=              '</LineStyle>\n'
+	kml +=              '<PolyStyle>\n'
+	kml +=                  '<color>7f00ff00</color>\n'
+	kml +=              '</PolyStyle>\n'
+	kml +=          '</Style>\n'
+	kml +=          '<Placemark>'
+	kml +=              '<name>GPS Log Path</name>'
+	kml +=              '<description>Path generated by the GPS log</description>'
+	kml +=              '<styleUrl>#yellowLineGreenPoly</styleUrl>'
+	kml +=              '<LineString>'
+	kml +=                  '<extrude>1</extrude>'
+	kml +=                  '<tessellate>1</tessellate>'
+	kml +=                  '<altitudeMode>absolute</altitudeMode>'
+	kml +=                  '<coordinates>'
+	for entry in gpsPath:
+		kml += repr(entry.longitude)
+		kml += ','
+		kml += repr(entry.latitude)
+		kml += ',0\n'
+	kml +=                  '</coordinates>'
+	kml +=              '</LineString>'
+	kml +=          '</Placemark>'
 
-        #Iterates over the number of asterisk file entries
-        while (i < len(core_entries)):
-                kml +=          '<Placemark>'
-                kml +=              '<name>Core Log TrackNum:'
-                kml +=				repr(core_entries[i].tn)
-                kml +=				'</name>'
-                kml +=              '<description>Path generated by the Core log</description>'
-                kml +=              '<styleUrl>#redLineGreenPoly</styleUrl>'
-                kml +=              '<LineString>'
-                kml +=                  '<extrude>1</extrude>'
-                kml +=                  '<tessellate>1</tessellate>'
-                kml +=                  '<altitudeMode>absolute</altitudeMode>'
-                kml +=                  '<coordinates>'
-                #Enters the first coordinates of a new track number
-                kml += repr(core_entries[i].longitude)
-                kml += ','
-                kml += repr (core_entries[i].latitude)
-                kml += ',0\n'
-                i += 1
-                #If the track number changes, stop the loop, and create a new line
-                if(i < len(core_entries)):
-                        while (core_entries[i-1].tn == core_entries[i].tn):
-                                kml += repr(core_entries[i].longitude)
-                                kml += ','
-                                kml += repr(core_entries[i].latitude)
-                                kml += ',0\n'
-                                i += 1
-                                if(i >= len(core_entries)):
-                                        break;
-                kml +=                  '</coordinates>'
-                kml +=              '</LineString>'
-                kml +=          '</Placemark>'
-        kml +=      '</Document>\n'
-        kml += '</kml>\n'
+	#Iterates over the number of asterisk file entries
+	for path in pathList:
+		kml +=          '<Placemark>'
+		kml +=              '<name>Core Log TrackNum:'
+		kml +=                              repr(path[0].tn)
+		kml +=                              '</name>'
+		kml +=              '<description>Path generated by the Core log</description>'
+		kml +=              '<styleUrl>#redLineGreenPoly</styleUrl>'
+		kml +=              '<LineString>'
+		kml +=                  '<extrude>1</extrude>'
+		kml +=                  '<tessellate>1</tessellate>'
+		kml +=                  '<altitudeMode>absolute</altitudeMode>'
+		kml +=                  '<coordinates>'
+		#Enters the first coordinates of a new track number
+		for entry in path:
+			kml +=                  repr(entry.longitude)
+			kml +=                  ','
+			kml +=                  repr(entry.latitude)
+			kml +=                  ',0\n'
+		kml +=                  '</coordinates>'
+		kml +=              '</LineString>'
+		kml +=          '</Placemark>'
+	kml +=      '</Document>\n'
+	kml += '</kml>\n'
 
 
-        #open and write file
-        filename = scenario.kmlDir + '/export_' + str(d.year) + '-' + str(d.month) + '-' + str(d.day) + '_' + str(d.hour) + '-' + str(d.minute) + '-' + str(d.second) + '-' + str(d.microsecond) + '.kml' 
-        f = open(filename, 'w')
-        f.write(kml)
-        f.close()
+	#open and write file
+	filename = scenario.kmlDir + '/export_' + str(d.year) + '-' + str(d.month) + '-' + str(d.day) + '_' + str(d.hour) + '-' + str(d.minute) + '-' + str(d.second) + '-' + str(d.microsecond) + '.kml' 
+	f = open(filename, 'w')
+	f.write(kml)
+	f.close()

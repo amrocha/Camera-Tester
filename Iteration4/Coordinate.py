@@ -12,3 +12,6 @@ class Coordinate:
 
 	def __str__(self):
 		return "Longitude: " + str(self.longitude) + " Latitude: " + str(self.latitude)
+
+	def __repr__(self):
+		return "Time: " + str(self.time) + " Tracknum: " + str(self.tn) + " Longitude: " + str(self.longitude) + " Latitude: " + str(self.latitude) + "\n"
