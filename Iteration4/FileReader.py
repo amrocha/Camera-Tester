@@ -7,7 +7,7 @@ from xml.etree.ElementTree import ParseError
 def parseCoreLogs(folderName):
         try:
                 fileList = os.listdir(folderName)
-        except WindowsError:
+        except OSError:
                 print 'Not a directory. Assuming file.'
                 fileList = list([folderName])
 
@@ -64,7 +64,7 @@ def parseGpsLog(fileName):
         except IOError, e:
                 print 'An error occurred while reading the GPS log file: ', str(e)
                 return -1
-        
+
 	gps_entries = list()
 	lines = list(f)
 	i = 0

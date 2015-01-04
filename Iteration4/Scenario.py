@@ -40,7 +40,7 @@ class Scenario:
         self.gpsPath = FileReader.parseGpsLog(self.gpsLog)
         if(self.gpsPath == -1):
             return
-        
+
         optimalPath = self.getOptimalPath(self.gpsPath, self.pathList)
         distances = self.calculateDistances(optimalPath)
         self.calculateMetrics(optimalPath, distances)
@@ -73,7 +73,7 @@ class Scenario:
     """
     coreLogPath is the list of Coordinates from the path that has been matched with the GPS file
     pathDistances is the list of calculated distances between each point in coreLogPath and the GPS path. The coordinate coreLogPath[i] has a distance of pathDistances[i].
-    
+
     for now I've assumed that a tracknum of -1 is used in coreLogPath at any point in time when nothing was detected
     this may need to be changed depending on how the path comparison is implemented
     """
@@ -82,14 +82,14 @@ class Scenario:
         print pathDistances
         #all counters with an array of length two have the twenty minute segment counter at index 0 and the total counter at index 1
         #index 0 resets every twenty minutes of footage
-        
+
         #for calculating the detection percent
         numUndetected = [0,0]
-        
+
         #for calculating id changes
         previousID = [-1,-1]
         numIDChanges = [-1,-1]
-        
+
         #for calculating the positional accuracy metrics
         totalDist = [0,0]
         minDist = [99999, 99999]
@@ -100,7 +100,7 @@ class Scenario:
         timeSegmentStart = coreLogPath[0].time[:4] + '00.000'
         timeSegmentStartIndex = 0
         self.twentyMinuteResults = []
-        
+
         for i in range(0, len(coreLogPath)):
             # if 20 minutes have passed, create the results. Then start the next twenty minute segment
             if (int(coreLogPath[i].time[2:4]) - int(timeSegmentStart[2:4]))%60 >= 20:
@@ -108,7 +108,7 @@ class Scenario:
                                                          numUndetected[0], numIDChanges[0], minDist[0], maxDist[0], totalDist[0], numAboveRadius[0]))
                 timeSegmentStartIndex = i
                 timeSegmentStart = self.addTimeStamps(timeSegmentStart, '002000.00')
-                
+
                 #reset all twenty minute segment counters
                 numUndetected[0] = 0
                 previousID[0] = -1
@@ -117,7 +117,7 @@ class Scenario:
                 minDist[0] = 99999
                 maxDist[0] = -1
                 numAboveRadius[0] = 0
-            
+
             if coreLogPath[i].tn < 0:
                 numUndetected[0] += 1
                 numUndetected[1] += 1
@@ -145,7 +145,7 @@ class Scenario:
         #add last segment
         self.twentyMinuteResults.append(self.createResult(len(coreLogPath) - timeSegmentStartIndex, timeSegmentStart, coreLogPath[len(coreLogPath) - 1].time,
                                                  numUndetected[0], numIDChanges[0], minDist[0], maxDist[0], totalDist[0], numAboveRadius[0]))
-        
+
         #create the total result
         self.totalResult = self.createResult(len(coreLogPath), coreLogPath[0].time[:4] + '00.000', coreLogPath[len(coreLogPath) - 1].time,
                                          numUndetected[1], numIDChanges[1], minDist[1], maxDist[1], totalDist[1], numAboveRadius[1])
@@ -162,7 +162,7 @@ class Scenario:
             percentWithinMaxRadius = -1
         result = MetricsResult(startTime, endTime, detectionPercent, numIDChanges, minDist, maxDist, averageDist, percentWithinMaxRadius)
         return result
-    
+
     #adds two timestamps of the format 'HHMMSS.mmm'
     def addTimeStamps(self, time1, time2):
         second = float(time1[4:]) + float(time2[4:])
@@ -186,7 +186,7 @@ class Scenario:
             second += '00'
         elif len(second) == 5:
             second += '0'
-        
+
         minute = str(minute)
         if len(minute) == 1:
             minute = '0' + minute
@@ -194,7 +194,7 @@ class Scenario:
         hour = str(hour)
         if len(hour) == 1:
             hour = '0' + hour
-        
+
         return hour + minute + second
 
     #Computes a list of distances between any path and the desired gps path
@@ -280,7 +280,7 @@ class Scenario:
             val = self.comparePointToPath(matchedPath, point)
             if(val is not None):
                 result += val
-                
+
         result = result/len(path)
         return result
 
@@ -300,7 +300,6 @@ class Scenario:
         distance = float('inf')
         for (i, s) in enumerate(segments):
             tempDistance = self.comparePointToPath(path, s[0])
-            print s
             if(tempDistance < distance):
                 segment = s
                 index = i
