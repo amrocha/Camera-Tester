@@ -32,19 +32,20 @@ class Scenario:
         self.maxRadius = maxRadius
 
     def run(self):
-        if self.coreLog == None:
-            self.coreLog = self.runCamSim()
-        self.pathList = FileReader.parseCoreLogs(self.coreLog)
-        if(self.pathList == -1):
-            return
         self.gpsPath = FileReader.parseGpsLog(self.gpsLog)
         if(self.gpsPath == -1):
+            return
+        print self.gpsPath
+        if self.coreLog == None:
+            self.coreLog = self.runCamSim()
+        self.pathList = FileReader.parseCoreLogs(self.coreLog, self.gpsPath[0].longitude, self.gpsPath[0].latitude)
+        if(self.pathList == -1):
             return
 
         optimalPath = self.getOptimalPath(self.gpsPath, self.pathList)
         distances = self.calculateDistances(optimalPath)
-        self.calculateMetrics(optimalPath, distances)
-        FileWriter.createDataSheet(self, self.totalResult, self.twentyMinuteResults)
+        #self.calculateMetrics(optimalPath, distances)
+        #FileWriter.createDataSheet(self, self.totalResult, self.twentyMinuteResults)
         FileWriter.export(self, self.gpsPath, [optimalPath])
         print "Minimum Distance"
         print min(distances)
@@ -228,16 +229,18 @@ class Scenario:
         paths = list()
         for (j, path) in enumerate(pathList):
             i = 0
+            k = 2
             index = 0
             distance = float('inf')
             while(i < len(path)):
-                tempDist = self.comparePointToPath(gpsPath[0:2],path[i])
+                tempDist = self.comparePointToPath(gpsPath[:],path[i])
                 if tempDist < distance:
                     distance = tempDist
                     index = i
                 i+=1
             if(distance < self.maxRadius):
                 paths.append((j, path[index:]))
+                print 'new path ' + str(j)
         return paths
 
     def getMatchingPath(self, gpsPath, pathList, pathTuple):
@@ -318,7 +321,7 @@ class Scenario:
 
         for (i, x) in enumerate(path):
 
-            dist = self.Pythagoras(x.longitude, x.latitude, c.longitude, c.latitude)
+            dist = self.Pythagoras(x.x, x.y, c.x, c.y)
             if(dist < minDist):
                 point1 = None
                 point2 = None
@@ -359,20 +362,31 @@ class Scenario:
 
         if point1 is not None:
             if point2 is None and point3 is not None:
-                minDist = DistancePointLine(c.longitude, c.latitude, point1.longitude, point1.latitude, point3.longitude, point3.latitude)
+                minDist = DistancePointLine(c.x, c.y, point1.x, point1.y, point3.x, point3.y)
 
             elif point2 is not None and point3 is None:
-                minDist = DistancePointLine(c.longitude, c.latitude, point1.longitude, point1.latitude, point2.longitude, point2.latitude)
+                minDist = DistancePointLine(c.x, c.y, point1.x, point1.y, point2.x, point2.y)
 
             elif point2 is None and point3 is None:
-                minDist = self.Pythagoras(c.longitude, c.latitude, point1.longitude, point1.latitude)
+                minDist = self.Pythagoras(c.x, c.y, point1.x, point1.y)
 
             else:
                 minDist =  min(
-                    DistancePointLine(c.longitude, c.latitude, point1.longitude, point1.latitude, point2.longitude, point2.latitude),
-                    DistancePointLine(c.longitude, c.latitude, point1.longitude, point1.latitude, point3.longitude, point3.latitude)
+                    DistancePointLine(c.x, c.y, point1.x, point1.y, point2.x, point2.y),
+                    DistancePointLine(c.x, c.y, point1.x, point1.y, point3.x, point3.y)
                 )
             return minDist
 
         else:
             return None
+
+    def test(self, pathList, p):
+        print p.longitude
+        print p.latitude
+        a = list()
+        for path in pathList:
+            for point in path:
+                a.append((self.Pythagoras(p.longitude, p.latitude, point.longitude, point.latitude), point.longitude, point.latitude))
+
+        a.sort(key=lambda point:point[0])
+        print a[:100]
