@@ -8,16 +8,16 @@ from Coordinate import Coordinate
 
 #longitude and latitude aren't used in the current implementation, since distances are already calculated and used as input, so they can be set arbitrarily
 coreLogPath = list()
-coreLogPath.append(Coordinate('230001.550',-1,0,0))
-coreLogPath.append(Coordinate('230004.000',-1,0,0))
-coreLogPath.append(Coordinate('230444.000',-1,0,0))
-coreLogPath.append(Coordinate('230664.000',-1,0,0))
-coreLogPath.append(Coordinate('230708.000',-1,0,0))
-coreLogPath.append(Coordinate('230822.000',-1,0,0))
-coreLogPath.append(Coordinate('231122.000',-1,0,0))
-coreLogPath.append(Coordinate('231155.000',-1,0,0))
-coreLogPath.append(Coordinate('231422.000',-1,0,0))
-coreLogPath.append(Coordinate('231722.000',-1,0,0))
+coreLogPath.append(Coordinate(23*3600 + 00*60 + 01.550,-1,0,0,0,0)) #23:00:01.550
+coreLogPath.append(Coordinate(23*3600 + 00*60 + 04.000,-1,0,0,0,0)) #23:00:04.000
+coreLogPath.append(Coordinate(23*3600 + 04*60 + 44.000,-1,0,0,0,0)) #23:04:44.000
+coreLogPath.append(Coordinate(23*3600 + 06*60 + 64.000,-1,0,0,0,0)) #23:06:64.000
+coreLogPath.append(Coordinate(23*3600 + 07*60 + 08.000,-1,0,0,0,0)) #23:07:08.000
+coreLogPath.append(Coordinate(23*3600 +  8*60 + 22.000,-1,0,0,0,0)) #23:08:22.000
+coreLogPath.append(Coordinate(23*3600 + 11*60 + 22.000,-1,0,0,0,0)) #23:11:22.000
+coreLogPath.append(Coordinate(23*3600 + 11*60 + 55.000,-1,0,0,0,0)) #23:11:55.000
+coreLogPath.append(Coordinate(23*3600 + 14*60 + 22.000,-1,0,0,0,0)) #23:14:22.000
+coreLogPath.append(Coordinate(23*3600 + 17*60 + 22.000,-1,0,0,0,0)) #23:17:22.000
 
 distances = list()
 distances.append(1.2)
@@ -35,8 +35,8 @@ scenario = Scenario(1, 5.0, '', '', '')
 scenario.calculateMetrics(coreLogPath, distances)
 
 print 'Overall Results'
-print 'Start Time: ', scenario.totalResult.startTime                                                    #expected: 230000.000
-print 'End Time: ', scenario.totalResult.endTime                                                        #expected: 231722.000
+print 'Start Time: ', scenario.timeToString(scenario.totalResult.startTime)                             #expected: 230000.000
+print 'End Time: ', scenario.timeToString(scenario.totalResult.endTime)                                 #expected: 231722.000
 print 'Detection percent: ', scenario.totalResult.detectionPercent, '%'                                 #expected: 0%
 print 'ID changes: ', scenario.totalResult.idChanges                                                    #expected: -1
 print 'Min distance', scenario.totalResult.minPositonalAccuracy                                         #expected: 99999
@@ -47,8 +47,8 @@ print 'Percent within ', scenario.maxRadius, 'm: ', scenario.totalResult.percent
 #20 minute segments
 print '\nNumber of 20 minute segments: ', len(scenario.twentyMinuteResults)
 for i in range(0, len(scenario.twentyMinuteResults)):                                                                   #expected: one 20 minute segments
-    print '\nStart Time: ', scenario.twentyMinuteResults[i].startTime                                                   #expected: 230000.000
-    print 'End Time: ', scenario.twentyMinuteResults[i].endTime                                                         #expected: 231722.000
+    print '\nStart Time: ', scenario.timeToString(scenario.twentyMinuteResults[i].startTime)                            #expected: 230000.000
+    print 'End Time: ', scenario.timeToString(scenario.twentyMinuteResults[i].endTime)                                  #expected: 231722.000
     print 'Detection percent: ', scenario.twentyMinuteResults[i].detectionPercent, '%'                                  #expected: 0%
     print 'Min distance', scenario.twentyMinuteResults[i].minPositonalAccuracy                                          #expected: -1
     print 'Max distance', scenario.twentyMinuteResults[i].maxPositionalAccuracy                                         #expected: 99999

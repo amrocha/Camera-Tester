@@ -5,13 +5,13 @@ from Scenario import Scenario
 from MetricsResult import MetricsResult
 import FileWriter
 
-totalResult = MetricsResult('230000.000', '001301.000', 60, 4, 2.1, 7.5, 5.35, 33.333)
+totalResult = MetricsResult(23*3600 + 00*60 + 00.000, 00*3600 + 13*60 + 01.000, 60, 4, 2.1, 7.5, 5.35, 33.333)
 
 twentyMinuteResults = list()
-twentyMinuteResults.append(MetricsResult('230000.000', '231959.999', 66.666, 5.3, 6.6, 7.5, 5.35, 33.333))
-twentyMinuteResults.append(MetricsResult('232000.000', '233959.999', 0, 99999, -1, -1, -1, -1))
-twentyMinuteResults.append(MetricsResult('234000.000', '235959.999', 100, 2.1, 7.5, 4.8, 1, 50))
-twentyMinuteResults.append(MetricsResult('001301.000', '001301.000', 66.666, 4.3, 6.3, 5.3, 1, 50))
+twentyMinuteResults.append(MetricsResult(23*3600 + 00*60 + 00.000, 23*3600 + 19*60 + 59.999, 66.666, 5.3, 6.6, 7.5, 5.35, 33.333))
+twentyMinuteResults.append(MetricsResult(23*3600 + 20*60 + 00.000, 23*3600 + 39*60 + 59.999, 0, 99999, -1, -1, -1, -1))
+twentyMinuteResults.append(MetricsResult(23*3600 + 40*60 + 00.000, 23*3600 + 59*60 + 59.999, 100, 2.1, 7.5, 4.8, 1, 50))
+twentyMinuteResults.append(MetricsResult(00*3600 + 13*60 + 01.000, 00*3600 + 13*60 + 01.000, 66.666, 4.3, 6.3, 5.3, 1, 50))
 
 print 'Test1: Valid input'
 scenario = Scenario(1, 5.0, sys.path[0], '', 'example_gps.log', 'example_core.log', 4)  

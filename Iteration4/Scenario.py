@@ -44,8 +44,8 @@ class Scenario:
 
         optimalPath = self.getOptimalPath(self.gpsPath, self.pathList)
         distances = self.calculateDistances(optimalPath)
-        #self.calculateMetrics(optimalPath, distances)
-        #FileWriter.createDataSheet(self, self.totalResult, self.twentyMinuteResults)
+        self.calculateMetrics(optimalPath, distances)
+        FileWriter.createDataSheet(self, self.totalResult, self.twentyMinuteResults)
         FileWriter.export(self, self.gpsPath, [optimalPath])
         print "Minimum Distance"
         print min(distances)
@@ -98,17 +98,20 @@ class Scenario:
         numAboveRadius = [0,0]
 
         #used for 20 minute time segments
-        timeSegmentStart = coreLogPath[0].time[:4] + '00.000'
+        timeSegmentStart = coreLogPath[0].time - coreLogPath[0].time%60 #time segments start on the minute
         timeSegmentStartIndex = 0
         self.twentyMinuteResults = []
 
         for i in range(0, len(coreLogPath)):
             # if 20 minutes have passed, create the results. Then start the next twenty minute segment
-            if (int(coreLogPath[i].time[2:4]) - int(timeSegmentStart[2:4]))%60 >= 20:
-                self.twentyMinuteResults.append(self.createResult(i - timeSegmentStartIndex, timeSegmentStart, self.addTimeStamps(timeSegmentStart, '001959.999'),
+            diff = coreLogPath[i].time - timeSegmentStart
+            if(diff < 0):
+                diff += 24*3600
+            if (diff >= 20*60):
+                self.twentyMinuteResults.append(self.createResult(i - timeSegmentStartIndex, timeSegmentStart, (timeSegmentStart + 19*60 +59.999)%(24*3600),
                                                          numUndetected[0], numIDChanges[0], minDist[0], maxDist[0], totalDist[0], numAboveRadius[0]))
                 timeSegmentStartIndex = i
-                timeSegmentStart = self.addTimeStamps(timeSegmentStart, '002000.00')
+                timeSegmentStart = (timeSegmentStart + 20*60)%(24*3600)
 
                 #reset all twenty minute segment counters
                 numUndetected[0] = 0
@@ -148,7 +151,7 @@ class Scenario:
                                                  numUndetected[0], numIDChanges[0], minDist[0], maxDist[0], totalDist[0], numAboveRadius[0]))
 
         #create the total result
-        self.totalResult = self.createResult(len(coreLogPath), coreLogPath[0].time[:4] + '00.000', coreLogPath[len(coreLogPath) - 1].time,
+        self.totalResult = self.createResult(len(coreLogPath), coreLogPath[0].time - coreLogPath[0].time%60, coreLogPath[len(coreLogPath) - 1].time,
                                          numUndetected[1], numIDChanges[1], minDist[1], maxDist[1], totalDist[1], numAboveRadius[1])
 
 
@@ -164,39 +167,32 @@ class Scenario:
         result = MetricsResult(startTime, endTime, detectionPercent, numIDChanges, minDist, maxDist, averageDist, percentWithinMaxRadius)
         return result
 
-    #adds two timestamps of the format 'HHMMSS.mmm'
-    def addTimeStamps(self, time1, time2):
-        second = float(time1[4:]) + float(time2[4:])
-        minute = int(time1[2:4]) + int(time2[2:4])
-        hour = int(time1[:2]) + int(time2[:2])
-        if second >= 60:
-            second %= 60
-            minute += 1
-        if minute >= 60:
-            minute %= 60
-            hour += 1
-        hour %= 24
+    #takes a numeric value of milliseconds and returns a string in the format HH:MM:SS.mmm
+    def timeToString(self, time):
+        hh = str(int(time/3600))
+        if len(hh) == 1:
+            hh = '0' + hh
+        
+        mm = str(int(time%3600 / 60))
+        if len(mm) == 1:
+            mm = '0' + mm
+        
+        ss = str(int(time%60))
+        if len(ss) == 1:
+            ss = '0' + ss
 
-        if second < 10:
-            second = '0' + str(second)
-        else:
-            second = str(second)
-        if len(second) == 2:
-            second += '.000'
-        elif len(second) == 4:
-            second += '00'
-        elif len(second) == 5:
-            second += '0'
+        mill = str(time%1)
+        if(len(mill) >= 5):
+            mill = mill[2:5]
+        elif(len(mill) == 4):
+            mill = mill[2:4] + '0'
+        elif(len(mill) == 3):
+            mill = mill[2] + '00'
+        elif(len(mill) < 3):
+            mill = '000'
 
-        minute = str(minute)
-        if len(minute) == 1:
-            minute = '0' + minute
-
-        hour = str(hour)
-        if len(hour) == 1:
-            hour = '0' + hour
-
-        return hour + minute + second
+        return hh + ':' + mm + ':' + ss + '.' + mill
+        
 
     #Computes a list of distances between any path and the desired gps path
     def calculateDistances(self, path):
