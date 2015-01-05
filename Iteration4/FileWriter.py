@@ -24,8 +24,8 @@ def createDataSheet(scenario, totalResult, twentyMinuteResults):
 
 	for i in range(0, len(twentyMinuteResults)):
 			result = twentyMinuteResults[i]
-			txt += 'Results from ' + result.startTime[:2] + ':' + result.startTime[2:4] + ':' + result.startTime[4:]
-			txt += ' to ' + result.endTime[:2] + ':' + result.endTime[2:4] + ':' + result.endTime[4:] + '\n'
+			txt += 'Results from ' + scenario.timeToString(result.startTime)
+                        txt += ' to ' + scenario.timeToString(result.endTime) + '\n'
 			txt = printIndividualResult(result, txt)
 
 	#open and write file
