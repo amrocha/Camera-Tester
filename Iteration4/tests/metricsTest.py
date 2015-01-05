@@ -8,16 +8,16 @@ from Coordinate import Coordinate
 
 #longitude and latitude aren't used in the current implementation, since distances are already calculated and used as input, so they can be set arbitrarily
 coreLogPath = list()
-coreLogPath.append(Coordinate('230001.550',-1,0,0))
-coreLogPath.append(Coordinate('230001.000',1,0,0))
-coreLogPath.append(Coordinate('231959.999',1,0,0))
-coreLogPath.append(Coordinate('232005.000',-1,0,0))
-coreLogPath.append(Coordinate('233908.000',-1,0,0))
-coreLogPath.append(Coordinate('234211.000',2,0,0))
-coreLogPath.append(Coordinate('235601.000',3,0,0))
-coreLogPath.append(Coordinate('000101.000',4,0,0))
-coreLogPath.append(Coordinate('000601.000',-1,0,0))
-coreLogPath.append(Coordinate('001301.000',5,0,0))
+coreLogPath.append(Coordinate('230001.550',-1,0,0,0,0))
+coreLogPath.append(Coordinate('230001.000',1,0,0,0,0))
+coreLogPath.append(Coordinate('231959.999',1,0,0,0,0))
+coreLogPath.append(Coordinate('232005.000',-1,0,0,0,0))
+coreLogPath.append(Coordinate('233908.000',-1,0,0,0,0))
+coreLogPath.append(Coordinate('234211.000',2,0,0,0,0))
+coreLogPath.append(Coordinate('235601.000',3,0,0,0,0))
+coreLogPath.append(Coordinate('000101.000',4,0,0,0,0))
+coreLogPath.append(Coordinate('000601.000',-1,0,0,0,0))
+coreLogPath.append(Coordinate('001301.000',5,0,0,0,0))
 
 distances = list()
 distances.append(1.2) #ignored
