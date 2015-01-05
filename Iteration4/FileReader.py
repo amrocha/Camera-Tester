@@ -51,7 +51,10 @@ def parseCoreLog(fileName, referenceLon, referenceLat, partial_entries=list()):
 				lat = cart.attrib.get('LAT')
 				lon = cart.attrib.get('LONG')
 				if tracknum > 0:
-					core_entries.append(Coordinate(formattedTime, tracknum, float(lon), float(lat), referenceLon, referenceLat))
+                                        try:
+					   core_entries.append(Coordinate(formattedTime, tracknum, float(lon), float(lat), referenceLon, referenceLat))
+                                        except Exception as e:
+                                                print  'Error parsing coordinate, skipping iterfind'
 	asterisk_entries = []
         core_entries.extend(partial_entries)
 	asterisk_entries = sorted(core_entries, key=attrgetter('tn', 'time'))

@@ -218,3 +218,15 @@ Iteration4/temp.py
 *.log
 *.kml
 Iteration4/tests/result_2015-1-4_7-38-54-527000.txt
+Iteration4/tests/package/TestData/dayGPS/park1and2 via kilo
+Iteration4/tests/package/TestData/dayGPS/park3
+Iteration4/tests/package/TestData/dayGPS/rwy05txwpapaquebec
+Iteration4/tests/package/TestData/dayGPS/rwy2305
+Iteration4/tests/package/TestData/dayGPS/rwy31
+Iteration4/tests/package/TestData/dayGPS/rwycefd
+Iteration4/tests/package/TestData/dayGPS/test1
+Iteration4/tests/package/TestData/dayGPS/txwlima
+Iteration4/tests/package/TestData/nightGPS/31
+Iteration4/tests/package/TestData/nightGPS/alpha31
+Iteration4/tests/package/TestData/nightGPS/delta
+Iteration4/tests/package/TestData/nightGPS/foxtrot

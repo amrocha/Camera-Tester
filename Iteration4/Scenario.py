@@ -216,7 +216,7 @@ class Scenario:
         optimalPath = None
         for (i, path) in enumerate(paths):
             path = paths[i]
-            print "Processing path " + str(i)
+            print "Processing path " + str(i) + "/" + str(len(paths))
             newPath = self.getMatchingPath(gpsPath, pathList, path)
             newPathEval = self.evaluatePath(gpsPath, newPath)
             if newPathEval < pathEval:
@@ -251,7 +251,7 @@ class Scenario:
         offset = float(path[0].time) - float(gpsPath[0].time)
         for (i, point) in enumerate(gpsPath):
             if(float(path[len(path)-1].time) >= offset+float(gpsPath[i].time)):
-                if(i < len(path)-1):
+                if(i < len(gpsPath)-1):
                     if(float(path[len(path)-1].time) <= offset+float(gpsPath[i+1].time)):
                         cutoff = i
                         break
@@ -268,7 +268,7 @@ class Scenario:
             #Re-calculate cutoff point after adding points to the optimal path
             for (i, point) in enumerate(gpsPath):
                 if(float(path[len(path)-1].time) >= offset+float(gpsPath[i].time)):
-                    if(i < len(path)-1):
+                    if(i < len(gpsPath)-1):
                         if(float(path[len(path)-1].time) <= offset+float(gpsPath[i+1].time)):
                             cutoff = i
                             break
